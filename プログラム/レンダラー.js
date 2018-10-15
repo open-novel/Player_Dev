@@ -238,7 +238,7 @@ export class RectangleNode extends Node {
 		let { pushed } = this
 
 		const r = H * .02, offset = H * .01
-		
+
 		if ( pushed ) { x += offset / 2, y += offset / 2 }
 
 		ctx.beginPath( )
@@ -768,7 +768,7 @@ export function onPoint ( { type, x, y } ) {
 				node.pushed = false
 				if ( pointer.delete( node ) ) {
 					let time = timers.get( node ).get( )
-					if ( time < 500 ) node.fire( 'click' )
+					if ( time < 750 ) node.fire( 'click' )
 					else { onAction( 'menu' ); break W }
 				}
 			} break
@@ -837,14 +837,14 @@ function isPointInPath( x, y ) {
 		let target = null
 
 		node.drawPath( prop )
-		if ( ctx.isPointInPath( x, y ) ) {	
+		if ( ctx.isPointInPath( x, y ) ) {
 
 			if ( node.listenerMode ) target = node
 			for ( let childnode of node.children ) {
 				let res = searchPointIn( childnode, prop )
 				if ( res ) target = res
 			}
-		
+
 		}
 
 		return target
@@ -853,7 +853,7 @@ function isPointInPath( x, y ) {
 
 }
 
-  
+
  function setShadow ( { offset, alpha = .9, blur = 5 } ) {
 	ctx.shadowOffsetX = ctx.shadowOffsetY = offset
 	ctx.shadowColor = `rgba( 0, 0, 0, ${ alpha } )`
