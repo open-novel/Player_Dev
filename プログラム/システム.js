@@ -19,7 +19,7 @@ async function play ( { ctx, mode, installEvent, option } ) {
 
 
 	//let settings = await $.fetchFile( 'json', './プログラム/設定.json' )
-	let settings = { }
+	let settings = $.parseSetting( await ( await fetch( './Player/プログラム/設定.txt' ) ).text( ) )
 	settings.ctx = ctx
 	//Object.assign( setting, systemSetting )
 	$.log( settings )
@@ -30,7 +30,9 @@ async function play ( { ctx, mode, installEvent, option } ) {
 	let sound = 'off'
 	if ( mode != 'install' ) {
 
-	let text = 'openノベルプレイヤー v1.0γ_053   18/10/09\\n' +
+
+
+	let text = `openノベルプレイヤー   ${ settings[ 'バージョン' ][ 0 ] }  ${ settings[ '更新年月日' ][ 0 ] } \\n` +
 		( option.pwa ? '【 PWA Mode 】\\n' : '' )
 
 
@@ -306,22 +308,80 @@ async function showSysMenu ( ) {
 						//if ( ! disp.isPresenting ) return yield { label: `VR　(現在ON：表示中)`, value: 'VR' }
 						if ( VR.failureNum ) return yield { label: `VR　(現在OFF:失敗${ VR.failureNum }回)`, value: 'VR' }	
 						return yield { label: `VR　(現在OFF)`, value: 'VR' }						
-					}
+					},
+					'投げ銭（寄付金）イメージテスト'
 
 				], { backLabel: '戻る', color: 'green' } )
 
 				if ( sel == $.Token.back ) break WHILE2
 				if ( sel == $.Token.close ) break WHILE
 
+				switch ( sel ) {
+					case 'VR': {
+						let res = await $.trying( Action.presentVR( VR.enabled = ! VR.enabled ) )
+						if ( res == $.Token.failure ) {
+							VR.failureNum = ( VR.failureNum || 0 ) + 1
+							VR.enabled = false
+						} else {
+							VR.failure = false						
+						}
+					} break
+					case '投げ銭（寄付金）イメージテスト': {
+						let methods = [{
+							supportedMethods: [ 'basic-card' ],
+							data: {
+								supportedNetworks: [ 'visa', 'mastercard', 'jcb' ],
+								supportedTypes: ['credit', 'debit']
+							}
+						}]
 
-				if  ( sel == 'VR' ) {
-					let res = await $.trying( Action.presentVR( VR.enabled = ! VR.enabled ) )
-					if ( res == $.Token.failure ) {
-						VR.failureNum = ( VR.failureNum || 0 ) + 1
-						VR.enabled = false
-					} else {
-						VR.failure = false						
-					}
+						let details = {
+							displayItems: [{
+								label: 'クリエイターに寄付する',
+								amount: { currency: 'JPN', value: '100' }
+							}],
+							total: {
+								label: 'Total',
+								amount: { currency: 'JPN', value: '100' }
+							}
+						}
+
+						Action.sysMessage(
+							'テストのため実際に課金されることはありません\\n' +
+							'支払い情報・その他個人情報などがこのツールを通じて\\n' +
+							'保存・送信されることはありません\\n'
+						) 
+
+
+						let req = new PaymentRequest( methods, details )
+						let res = await req.show( ).catch( ( ) => null )
+
+						if ( ! res ) Action.sysMessage( '支払いがキャンセルされました' )
+						else {
+
+							for ( let i = 0; i <= 12; i ++ ) {
+								Action.sysMessage(
+									'支払い処理中' + '.'.repeat( i ) + '\\n' +
+									'（テストのため実際には課金処理は行われていません）'
+									, Infinity
+								)
+								await $.timeout( 200 )
+							}
+							await res.complete( )
+							Action.sysMessage(
+								'支払いが完了しました\\n' +
+								'（テストのため実際には課金処理は行われていません）'
+							)
+
+						}
+
+						await Action.sysChoices( [ ], { backLabel: '戻る' } )
+
+
+						console.log( res )
+
+					} break
+
 				}
 			}
 
