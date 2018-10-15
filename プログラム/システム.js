@@ -231,7 +231,14 @@ async function showSysMenu ( ) {
 
 
 		let sel = await Action.sysChoices(
-			[ '受信チャンネル設定', 'データ保存状況', '実験機能' ], { backLabel: '戻る', color: 'green' }
+			[
+				'受信チャンネル設定',
+				'データ保存状況確認',
+				{
+					label: '🔧　実験機能　🔨',
+					'value': '実験機能'
+				}
+			], { backLabel: '戻る', color: 'green' }
 		)
 
 		$.log( sel )
@@ -270,7 +277,7 @@ async function showSysMenu ( ) {
 
 			} break
 
-			case 'データ保存状況': WHILE2: while ( true ) {
+			case 'データ保存状況確認': WHILE2: while ( true ) {
 
 				let { usage, quota } = await navigator.storage.estimate( )
 				let  persisted = await navigator.storage.persisted( )
