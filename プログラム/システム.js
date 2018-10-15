@@ -32,7 +32,7 @@ async function play ( { ctx, mode, installEvent, option } ) {
 
 
 
-	let text = `openノベルプレイヤー   ${ settings[ 'バージョン' ][ 0 ] }  ${ $.channel == 'Dev' ? '（開発版）  ' : '' }${ settings[ '更新年月日' ][ 0 ] } \\n` +
+	let text = `openノベルプレイヤー   ${ settings[ 'バージョン' ][ 0 ] }${ $.channel == 'Dev' ? '(開発版)' : '' }${ settings[ '更新年月日' ][ 0 ] } \\n` +
 		( option.pwa ? '【 PWA Mode 】\\n' : '' )
 
 
