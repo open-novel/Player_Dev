@@ -326,7 +326,7 @@ async function showSysMenu ( ) {
 				let sel = await Action.sysChoices( [
 
 					async function * ( ) {
-						if ( ! navigator.getVRDisplays ) return yield { label: `VR　(サポートされていません)`, disabled: true }
+						if ( ! navigator.getVRDisplays ) return yield { label: `VR　(非対応環境です)`, disabled: true }
 						yield { label: `VR　(デバイスの状態を確認中……)`, disabled: true }
 						let disp = ( await navigator.getVRDisplays( ) )[ 0 ]
 						VR.display = disp
@@ -337,7 +337,11 @@ async function showSysMenu ( ) {
 						if ( VR.failureNum ) return yield { label: `VR　(現在OFF:失敗${ VR.failureNum }回)`, value: 'VR' }
 						return yield { label: `VR　(現在OFF)`, value: 'VR' }
 					},
-					'投げ銭（寄付金）イメージテスト'
+					{
+						label: self.PaymentRequest ? '投げ銭（寄付金）イメージテスト' : '投げ銭テスト　（非対応環境です）',
+						value: '投げ銭',
+						disabled: ! self.PaymentRequest
+					}
 
 				], { backLabel: '戻る', color: 'green' } )
 
@@ -354,7 +358,7 @@ async function showSysMenu ( ) {
 							VR.failure = false
 						}
 					} break
-					case '投げ銭（寄付金）イメージテスト': {
+					case '投げ銭': {
 						let methods = [{
 							supportedMethods: [ 'basic-card' ],
 							data: {
