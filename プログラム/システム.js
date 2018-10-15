@@ -415,10 +415,10 @@ async function showSysMenu ( ) {
 							)
 
 						}
-						
+
 						console.log( res )
 
-						await Action.sysChoices( [ ], { backLabel: '戻る' } )
+						let sel = await Action.sysChoices( [ ], { backLabel: '戻る' } )
 						if ( sel == $.Token.back ) continue WHILE2
 						if ( sel == $.Token.close ) break WHILE
 
