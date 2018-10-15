@@ -19,7 +19,7 @@ async function play ( { ctx, mode, installEvent, option } ) {
 
 
 	//let settings = await $.fetchFile( 'json', './プログラム/設定.json' )
-	let settings = $.parseSetting( await ( await fetch( './Player/プログラム/設定.txt' ) ).text( ) )
+	let settings = $.parseSetting( await $.fetchFile( 'プログラム/設定.txt', 'text' ) )
 	settings.ctx = ctx
 	//Object.assign( setting, systemSetting )
 	$.log( settings )
@@ -61,7 +61,7 @@ async function play ( { ctx, mode, installEvent, option } ) {
 					Action.sysMessage( '登録が拒否されました' )
 				}
 				await Action.sysChoices( [ ], { backLabel: '戻る' } )
-				
+
 			} else {
 				Action.sysMessage(
 					'ブラウザに認められなかったため登録できませんでした\\n' +
@@ -86,7 +86,7 @@ async function play ( { ctx, mode, installEvent, option } ) {
 		if ( mode == 'install' ) return
 
 		await Action.initAction( settings )
-		
+
 		if ( res == 'error' ) Action.sysMessage( '問題が発生しました' )
 		else Action.sysMessage( '再生が終了しました' )
 		await Action.sysChoices( [ ], { backLabel: '作品選択へ' } )
@@ -229,7 +229,7 @@ async function showSysMenu ( ) {
 
 		Action.sysMessage( 'システムメニュー' )
 
-		
+
 		let sel = await Action.sysChoices(
 			[ 'データ保存状況', '実験機能' ], { backLabel: '戻る', color: 'green' }
 		)
@@ -268,7 +268,7 @@ async function showSysMenu ( ) {
 							'次回起動時からデータが永続的に保存されるようになりました\\n' +
 							'（自然と消えることが無いだけでユーザー操作では削除できます）\\n' +
 							'変更を反映させるためにプレイヤーをリセットしてください'
-						) 
+						)
 						await Action.sysChoices( [ ], { backLabel: 'リセットする', color: 'green' } )
 						location.reload( )
 						await $.neverDone
@@ -276,7 +276,7 @@ async function showSysMenu ( ) {
 						Action.sysMessage(
 							'データの永続的な保存が認められませんでした\\n' +
 							'（プレイヤーをアプリとして登録すると認められる可能性があります）'
-						) 
+						)
 						let sel = await Action.sysChoices( [
 							//'PWAとして登録する', '❔　PWAとは'
 						], { backLabel: '戻る', color: 'green' } )
@@ -306,8 +306,8 @@ async function showSysMenu ( ) {
 						if ( ! disp ) return yield { label: `VR　(デバイスが見つかりません)`, disabled: true }
 						//if ( ! disp.isConnected ) return yield { label: `VR　(「${disp.displayName}」を接続してください)`, disabled: true }
 						//if ( ! disp.isPresenting ) return yield { label: `VR　(現在ON：表示中)`, value: 'VR' }
-						if ( VR.failureNum ) return yield { label: `VR　(現在OFF:失敗${ VR.failureNum }回)`, value: 'VR' }	
-						return yield { label: `VR　(現在OFF)`, value: 'VR' }						
+						if ( VR.failureNum ) return yield { label: `VR　(現在OFF:失敗${ VR.failureNum }回)`, value: 'VR' }
+						return yield { label: `VR　(現在OFF)`, value: 'VR' }
 					},
 					'投げ銭（寄付金）イメージテスト'
 
@@ -323,7 +323,7 @@ async function showSysMenu ( ) {
 							VR.failureNum = ( VR.failureNum || 0 ) + 1
 							VR.enabled = false
 						} else {
-							VR.failure = false						
+							VR.failure = false
 						}
 					} break
 					case '投げ銭（寄付金）イメージテスト': {
@@ -350,7 +350,7 @@ async function showSysMenu ( ) {
 							'テストのため実際に課金されることはありません\\n' +
 							'支払い情報・その他個人情報などがこのツールを通じて\\n' +
 							'保存・送信されることはありません\\n'
-						) 
+						)
 
 
 						let req = new PaymentRequest( methods, details )

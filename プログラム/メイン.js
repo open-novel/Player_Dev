@@ -134,8 +134,5 @@ window.addEventListener( 'beforeinstallprompt', e => {
 	return false
 } )
 
-let time = Date.now( )
-let channel = localStorage.channel || 'Nom'
-if ( ! location.href.includes( '/Player' ) )
-	navigator.serviceWorker.register( `/サービス.js?ch=${channel}&t=${ time }` )
+
 //navigator.serviceWorker.register( `Player/サービス.js?t=${ time }`, { scope: '/Player/' } )
