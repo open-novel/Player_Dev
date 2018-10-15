@@ -19,7 +19,7 @@ async function play ( { ctx, mode, installEvent, option } ) {
 
 
 	//let settings = await $.fetchFile( 'json', './プログラム/設定.json' )
-	let settings = $.parseSetting( await $.fetchFile( 'プログラム/設定.txt', 'text' ) )
+	let settings = $.parseSetting( await $.fetchFile( '/プログラム/設定.txt', 'text' ) )
 	settings.ctx = ctx
 	//Object.assign( setting, systemSetting )
 	$.log( settings )
@@ -32,7 +32,7 @@ async function play ( { ctx, mode, installEvent, option } ) {
 
 
 
-	let text = `openノベルプレイヤー   ${ settings[ 'バージョン' ][ 0 ] }${ $.channel == 'Dev' ? '(開発版)' : '' }${ settings[ '更新年月日' ][ 0 ] } \\n` +
+	let text = `openノベルプレイヤー   ${ settings[ 'バージョン' ][ 0 ] }${ $.channel.includes( 'Dev' ) ? '(開発版)' : '' }  ${ settings[ '更新年月日' ][ 0 ] } \\n` +
 		( option.pwa ? '【 PWA Mode 】\\n' : '' )
 
 
@@ -231,7 +231,7 @@ async function showSysMenu ( ) {
 
 
 		let sel = await Action.sysChoices(
-			[ 'データ保存状況', '実験機能' ], { backLabel: '戻る', color: 'green' }
+			[ '受信チャンネル設定', 'データ保存状況', '実験機能' ], { backLabel: '戻る', color: 'green' }
 		)
 
 		$.log( sel )
@@ -241,6 +241,34 @@ async function showSysMenu ( ) {
 			case $.Token.back:
 			case $.Token.close:
 				break WHILE
+
+			case '受信チャンネル設定': {
+				Action.sysMessage(
+					'プレイヤーの受信チャンネルを選択してください\\n' +
+					'安定版：　通常はこちらを選択してください\\n' +
+					'開発版：　安定版より約１周間早く新機能を試せますが不安定です\\n'
+				)
+				let isStable = ! $.cannel
+				let sel = await Action.sysChoices(
+					[
+						{ label: '安定版' + ( isStable ? '（📡受信中）' : '　　　　　　' ) , value: '安定版' },
+						{ label: '開発版' + ( isStable ? '　　　　　　'　 : '（📡受信中）' ), value: '開発版' }
+					], { backLabel: '戻る', color: 'green' }
+				)
+
+				if ( sel == $.Token.back ) break SWITCH
+				if ( sel == $.Token.close ) break WHILE
+				localStorage.playerChannnel = ( sel == '安定版' ) ? '' : 'Dev'
+
+				Action.sysMessage(
+					'次回起動時から【' + sel + '】を受信するよう設定しました\\n' +
+					'変更を反映させるためにプレイヤーをリセットしてください'
+				)
+				await Action.sysChoices( [ ], { backLabel: 'リセットする', color: 'green' } )
+
+
+
+			} break
 
 			case 'データ保存状況': WHILE2: while ( true ) {
 
@@ -290,7 +318,7 @@ async function showSysMenu ( ) {
 			case '実験機能': WHILE2: while ( true ) {
 
 				Action.sysMessage(
-					'クリックで各機能の有効無効を切り替えられます'
+					'クリックで各機能を設定できます'
 				)
 
 				let VR = $.Settings.VR
