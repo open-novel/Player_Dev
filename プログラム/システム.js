@@ -387,7 +387,7 @@ async function showSysMenu ( ) {
 
 						Action.sysMessage(
 							'テストのため実際に課金されることはありません\\n' +
-							'支払い情報・その他個人情報などがこのツールを通じて\\n' +
+							'支払い情報・その他個人情報などがこのツールを通して\\n' +
 							'保存・送信されることはありません\\n'
 						)
 
@@ -401,6 +401,7 @@ async function showSysMenu ( ) {
 							for ( let i = 0; i <= 12; i ++ ) {
 								Action.sysMessage(
 									'支払い処理中' + '.'.repeat( i ) + '\\n' +
+									' \\n' +
 									'（テストのため実際には課金処理は行われていません）'
 									, Infinity
 								)
@@ -409,6 +410,7 @@ async function showSysMenu ( ) {
 							await res.complete( )
 							Action.sysMessage(
 								'支払いが完了しました\\n' +
+								' \\n' +
 								'（テストのため実際には課金処理は行われていません）'
 							)
 
