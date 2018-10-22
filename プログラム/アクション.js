@@ -202,7 +202,7 @@ async function showLog ( layer ) {
 
 	let title = settings.title
 	if ( ! title ) return
-	
+
 	let { logBox, logArea } = layer
 
 	logArea.clear( )
@@ -212,7 +212,7 @@ async function showLog ( layer ) {
 		let preRow = i == 0 ? 0 : log[ i - 1 ][ log[ i - 1 ].length - 1 ].row + 1
 		for ( let deco of decoList ) deco.row += preRow
 	}
-	
+
 
 	logArea.put( log.flat( ) )
 
@@ -356,7 +356,6 @@ export function sysMessage ( text, speed = 100 ) {
 export async function showMessage ( layer, name, text, speed ) {
 
 	let nameArea = layer.nameArea.reborn( ), messageArea = layer.messageArea.reborn( )
-	nameArea.clear( ), messageArea.clear( )
 
 	if ( name.length == 0 && text.length == 0 ) {
 		layer.conversationBox.hide( )
@@ -365,76 +364,112 @@ export async function showMessage ( layer, name, text, speed ) {
 	layer.conversationBox.show( )
 
 
+	nameArea.clear( )
+	for ( let deco of decoText( name )[ 0 ] ) nameArea.add( deco )
 
-	for ( let deco of decoText( name ) ) nameArea.add( deco )
+	for ( let decoList of decoText( text ) ) {
 
-	let decoList = decoText( text )
+		messageArea.clear( )
+		//$.log( decoList )
 
-	//$.log( decoList )
+		let len = decoList.length
+		let index = 0
 
-	let len = decoList.length
-	let index = 0
+		let decoListPure = decoList.filter( deco => !! deco.text )
 
-	let decoListPure = decoList.filter( deco => !! deco.text )
+		messageLog.push( decoListPure )
 
-	messageLog.push( decoListPure )
+		let time = new $.Time
 
-	let time = new $.Time
+		if ( speed == Infinity ) messageArea.put( decoListPure )
 
-	if ( speed == Infinity ) messageArea.put( decoListPure )
+		else loop: while ( true ) {
 
-	else loop: while ( true ) {
+			let interrupt = await trigger.stepOrFrameupdate( )
 
-		let interrupt = await trigger.stepOrFrameupdate( )
+			let to = interrupt ? len : speed * time.get( ) / 1000 | 0
 
-		let to = interrupt ? len : speed * time.get( ) / 1000 | 0
-
-		for ( ; index < to && index < len; index ++ ) {
-			let deco = decoList[ index ], wait = deco.wait || 0
-			if ( wait ) {
-				index ++
-				time.pause( )
-				await trigger.stepOrTimeout( wait / speed * 1000 )
-				time.resume( )
-				continue loop
+			for ( ; index < to && index < len; index ++ ) {
+				let deco = decoList[ index ], wait = deco.wait || 0
+				if ( wait ) {
+					index ++
+					time.pause( )
+					await trigger.stepOrTimeout( wait / speed * 1000 )
+					time.resume( )
+					continue loop
+				}
+				messageArea.add( deco )
 			}
-			messageArea.add( deco )
+
+			if ( to >= len ) break
 		}
 
-		if ( to >= len ) break
-	}
-
 	await trigger.step( )
+
+	}
 
 }
 
 
 function decoText ( text ) {
 
-	let decoList = [ ]
+	let decoList = [ ], decoListList = [ ]
 
 	let mag = 1, bold = false, color = undefined, row = 0
+	let width = 0, height = 0, hMax = 1
 
 	for ( let unit of ( text.match( /\\\w(\[[\w.]+\])?|./gu ) || [ ] ) ) {
 		let magic = unit.match( /\\(\w)\[?([\w.]+)?\]?/ )
 		if ( magic ) {
 			let [ , type, val ] = magic
 			switch ( type ) {
-						case 'w': decoList.push( { wait: val || Infinity } )
-				break;	case 'n': row ++
+							case 'w': decoList.push( { wait: val || Infinity } )
+				break;	case 'n': newLine( )
 				break;	case 'b': bold = true
 				break;	case 'B': bold = false
 				break;	case 'c': color = val
-				break;	case 's': mag = val
+				break;	case 's': { mag = val; if ( hMax < mag ) hMax = mag }
 				break;	default : $.warn( `"${ type }" このメタ文字は未実装です`　)
 			}
 		} else {
-			decoList.push( { text: unit, mag, bold, color, row } )
+			let deco = { text: unit, mag, bold, color, row }
+			width += Renderer.DecoTextNode.measureWidth( deco )
+			$.log( width, height + hMax )
+			decoList.push( deco )
+			if ( width > 32 ) {
+				//if ( unit.match( /[、。・,.]/ ) )
+				newLine( )
+			}
+
 		}
 
 	}
 
-	return decoList
+
+	function newLine ( end = false ) {
+		height += hMax; hMax = 1
+		if ( height > 3.2 || end ) {
+			let oldDecoList = [ ], newDecoList = [ ]
+			for ( let deco of decoList ) {
+				if ( deco.row == row && row != 0 ) {
+					deco.row = 0
+					newDecoList.push( deco )
+				} else oldDecoList.push( deco )
+			}
+			decoListList.push( oldDecoList )
+			decoList.push( { wait: Infinity } )
+			decoList = newDecoList
+			height = 0; row = 0
+
+		}
+		row ++; width = 0;
+		if ( end && decoList.length ) decoListList.push( decoList )
+
+	}
+
+	newLine( true )
+	$.log( decoListList )
+	return decoListList
 
 }
 
@@ -551,7 +586,7 @@ function animateImages ( time ) {
 		let msec = time - baseTime
 
 		// Array.from( xml.querySelectorAll( 'animate' ), elm => {
-		// 	let begin = +( elm.getAttribute( 'begin' ) || '' ).match( /\d+|/ )[ 0 ] || 0 
+		// 	let begin = +( elm.getAttribute( 'begin' ) || '' ).match( /\d+|/ )[ 0 ] || 0
 		// 	let end = +( elm.getAttribute( 'end' ) || '' ).match( /\d+|/ )[ 0 ] || 0
 		// 	elm.setAttribute( 'begin', begin - sec + 's' )
 		// 	if ( end ) elm.setAttribute( 'end', end - sec + 's' )
@@ -559,7 +594,7 @@ function animateImages ( time ) {
 
 		for ( let { element, values, duration } of animates ) {
 
-			
+
 			let index = ( ( msec / duration ) % 1 ) * values.length | 0
 			//$.log( duration, msec / duration, index, values )
 			element.setAttribute( 'values', values[ index ] )
@@ -571,7 +606,7 @@ function animateImages ( time ) {
 		$.getImage( blob ).then( img => image.prop( 'img', img ) )
 
 	}
-	
+
 
 }
 
@@ -831,7 +866,7 @@ export async function showChoices ( { layer, choices, inputBox = layer.menuBox, 
 		layer.menuLabels.children.forEach( label => label.prop( 'o', 0 ) )
 		layer.menuLabels.open.prop( 'o', 1 )
 	}
-	
+
 	return val
 
 }
@@ -848,7 +883,7 @@ export async function presentVR ( flag ) {
 		// 		document.body.onclick = null
 		// 	}
 		// } )
-		return VR.display.requestPresent( [ { source: settings.ctx.canvas } ] ) 
+		return VR.display.requestPresent( [ { source: settings.ctx.canvas } ] )
 	} else {
 		return VR.display.exitPresent( )
 	}

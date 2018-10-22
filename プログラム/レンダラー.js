@@ -362,10 +362,13 @@ export class DecoTextNode extends Node {
 
 	draw ( { x, y, w, h } ) {
 
-		let preRow = 0, xBuf = 0
+		let preRow = 0, xBuf = 0, yBuf = 0, yMax = 0
 
 		for ( let { text, mag = 1, bold = false, color: fill = this.fill, row = 0 } of this.decoList ) {
-			if ( preRow != row ) xBuf = 0
+			if ( preRow != row ) {
+				yBuf += yMax * 1.5
+				xBuf = yMax = 0
+			}
 			preRow = row
 			let size = this.size * mag
 			ctx.font = `${ bold ? 'bold' : '' } ${ h * size }px "Hiragino Kaku Gothic ProN", Meiryo`
@@ -373,17 +376,53 @@ export class DecoTextNode extends Node {
 
 			let b = ( h *  size )  * .025 + 2.5
 
-			setShadow( { offset: b } )
 			ctx.fillStyle = fill
-			ctx.fillText( text, x + xBuf, y + ( row * h * size * 1.4 ) + h * size / 2 )
+			setShadow( { offset: b } )
+			ctx.fillText( text, x + xBuf, y + yBuf + h * size / 2 )
+
 			let metrics = ctx.measureText( text )
 			xBuf += metrics.width
-
+			if ( yMax < h * size ) yMax = h * size
 
 		}
 
-
 	}
+
+	static measureWidth ( deco ) {
+
+		let { text, mag = 1, bold = false } = deco
+		ctx.font = `${ bold ? 'bold' : '' } ${ 100 * mag }px "Hiragino Kaku Gothic ProN", Meiryo`
+		return ctx.measureText( text ).width / 100
+	}
+
+
+	static measureTextLine ( decoList ) {
+
+		let preRow = 0, xBuf = 0, yBuf = 0, yMax = 0
+		let res = [ ]
+
+		for ( let { text, mag = 1, bold = false, color: fill = this.fill, row = 0 } of decoList ) {
+			if ( preRow != row ) {
+				yBuf += yMax
+				res.push( [ xBuf / 100, yBuf ] )
+				xBuf = yMax = 0
+			}
+			preRow = row
+			ctx.font = `${ bold ? 'bold' : '' } ${ 100 * mag }px "Hiragino Kaku Gothic ProN", Meiryo`
+			//ctx.textBaseline = 'top'
+
+			ctx.fillStyle = fill
+			let metrics = ctx.measureText( text )
+			xBuf += metrics.width
+			if ( yMax < mag ) yMax = mag
+		}
+
+		yBuf += yMax
+		res.push( [ xBuf / 100, yBuf ] )
+
+		return res
+	}
+
 
 }
 
@@ -453,7 +492,7 @@ function initLayer ( ) {
 			},
 			{
 				type: RectangleNode, name: 'conversationBox',
-				y: .75, h: .25, shadow: false, fill: 'rgba( 0, 0, 100, .5 )',
+				y: .78, h: .22, shadow: false, fill: 'rgba( 0, 0, 100, .5 )',
 				children: [
 					{
 						type: DecoTextNode, name: 'nameArea',

@@ -32,8 +32,8 @@ async function play ( { ctx, mode, installEvent, option } ) {
 
 
 
-	let text = `openノベルプレイヤー   ${ settings[ 'バージョン' ][ 0 ] }${ $.channel.includes( 'Dev' ) ? '(開発版)' : '' }  ${ settings[ '更新年月日' ][ 0 ] } \\n` +
-		( option.pwa ? '【 PWA Mode 】\\n' : '' )
+	let text = `openノベルプレイヤー  ${ option.pwa ? '【 PWA Mode 】' : '' }\\n \\n` +
+		`${ settings[ 'バージョン' ][ 0 ] }${ $.channel.includes( 'Dev' ) ? '(開発版)' : '' }  ${ settings[ '更新年月日' ][ 0 ] } \\n`
 
 
 		WHILE: while ( true ) {
@@ -398,7 +398,7 @@ async function showSysMenu ( ) {
 						if ( ! res ) Action.sysMessage( '支払いがキャンセルされました' )
 						else {
 
-							for ( let i = 0; i <= 12; i ++ ) {
+							for ( let i = 0; i <= 15; i ++ ) {
 								Action.sysMessage(
 									'支払い処理中' + '.'.repeat( i ) + '\\n' +
 									' \\n' +
