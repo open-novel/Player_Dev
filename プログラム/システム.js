@@ -344,11 +344,11 @@ async function showSysMenu ( ) {
 						if ( VR.failureNum ) return yield { label: `VR　(現在OFF:失敗${ VR.failureNum }回)`, value: 'VR' }
 						return yield { label: `VR　(現在OFF)`, value: 'VR' }
 					},
-					{
-						label: self.PaymentRequest ? '投げ銭（寄付金）イメージテスト' : '投げ銭テスト　（非対応環境です）',
-						value: '投げ銭',
-						disabled: ! self.PaymentRequest
-					}
+					// {
+					// 	label: self.PaymentRequest ? '投げ銭（寄付金）イメージテスト' : '投げ銭テスト　（非対応環境です）',
+					// 	value: '投げ銭',
+					// 	disabled: ! self.PaymentRequest
+					// }
 
 				], { backLabel: '戻る', color: 'green' } )
 

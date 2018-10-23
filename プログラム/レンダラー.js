@@ -365,11 +365,12 @@ export class DecoTextNode extends Node {
 		let preRow = 0, xBuf = 0, yBuf = 0, yMax = 0
 
 		for ( let { text, mag = 1, bold = false, color: fill = this.fill, row = 0 } of this.decoList ) {
-			if ( preRow != row ) {
+			while ( preRow != row ) {
 				yBuf += yMax * 1.5
-				xBuf = yMax = 0
+				xBuf = 0, yMax = 1
+				preRow ++
 			}
-			preRow = row
+
 			let size = this.size * mag
 			ctx.font = `${ bold ? 'bold' : '' } ${ h * size }px "Hiragino Kaku Gothic ProN", Meiryo`
 			//ctx.textBaseline = 'top'

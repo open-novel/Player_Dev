@@ -365,7 +365,7 @@ export async function showMessage ( layer, name, text, speed ) {
 
 
 	nameArea.clear( )
-	for ( let deco of decoText( name )[ 0 ] ) nameArea.add( deco )
+	for ( let deco of decoText( name )[ 0 ].filter( deco => !! deco.text ) ) nameArea.add( deco )
 
 	for ( let decoList of decoText( text ) ) {
 
@@ -428,13 +428,15 @@ function decoText ( text ) {
 				break;	case 'b': bold = true
 				break;	case 'B': bold = false
 				break;	case 'c': color = val
+				break;	case 'C': color = undefined
 				break;	case 's': { mag = val; if ( hMax < mag ) hMax = mag }
+				break;	case 'S': mag = 1
 				break;	default : $.warn( `"${ type }" このメタ文字は未実装です`　)
 			}
 		} else {
 			let deco = { text: unit, mag, bold, color, row }
 			width += Renderer.DecoTextNode.measureWidth( deco )
-			$.log( width, height + hMax )
+			//$.log( width, height + hMax )
 			decoList.push( deco )
 			if ( width > 32 ) {
 				//if ( unit.match( /[、。・,.]/ ) )
@@ -447,8 +449,9 @@ function decoText ( text ) {
 
 
 	function newLine ( end = false ) {
-		height += hMax; hMax = 1
-		if ( height > 3.2 || end ) {
+		height += hMax
+		hMax = mag
+		if ( height > 3.2 ) {
 			let oldDecoList = [ ], newDecoList = [ ]
 			for ( let deco of decoList ) {
 				if ( deco.row == row && row != 0 ) {
@@ -457,14 +460,14 @@ function decoText ( text ) {
 				} else oldDecoList.push( deco )
 			}
 			decoListList.push( oldDecoList )
-			decoList.push( { wait: Infinity } )
 			decoList = newDecoList
+		}
+		if ( height > 3.2 || end ) {
+			decoList.push( { wait: Infinity } )
 			height = 0; row = 0
-
 		}
 		row ++; width = 0;
 		if ( end && decoList.length ) decoListList.push( decoList )
-
 	}
 
 	newLine( true )
