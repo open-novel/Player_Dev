@@ -450,7 +450,6 @@ function decoText ( text ) {
 
 	function newLine ( end = false ) {
 		height += hMax
-		hMax = mag
 		if ( height > 3.2 ) {
 			let oldDecoList = [ ], newDecoList = [ ]
 			for ( let deco of decoList ) {
@@ -464,8 +463,9 @@ function decoText ( text ) {
 		}
 		if ( height > 3.2 || end ) {
 			decoList.push( { wait: Infinity } )
-			height = 0; row = 0
+			height = hMax; row = 0
 		}
+		hMax = mag
 		row ++; width = 0;
 		if ( end && decoList.length ) decoListList.push( decoList )
 	}
