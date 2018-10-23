@@ -365,7 +365,7 @@ export async function showMessage ( layer, name, text, speed ) {
 
 
 	nameArea.clear( )
-	for ( let deco of decoText( name )[ 0 ].filter( deco => !! deco.text ) ) nameArea.add( deco )
+	for ( let deco of ( decoText( name )[ 0 ] || [ ] ).filter( deco => !! deco.text ) ) nameArea.add( deco )
 
 	for ( let decoList of decoText( text ) ) {
 
@@ -404,7 +404,7 @@ export async function showMessage ( layer, name, text, speed ) {
 			if ( to >= len ) break
 		}
 
-	await trigger.step( )
+		await trigger.step( )
 
 	}
 
@@ -461,8 +461,8 @@ function decoText ( text ) {
 			decoListList.push( oldDecoList )
 			decoList = newDecoList
 		}
-		if ( height > 3.2 || end ) {
-			decoList.push( { wait: Infinity } )
+		if ( height > 3.2 ) {
+			//decoList.push( { wait: 0 } )
 			height = hMax; row = 0
 		}
 		hMax = mag
