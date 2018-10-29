@@ -364,8 +364,11 @@ export class DecoTextNode extends Node {
 
 		let preRow = 0, xBuf = 0, yBuf = 0, yMax = 0
 
-		for ( let { text, mag = 1, bold = false, color: fill = this.fill, row = 0 } of this.decoList ) {
-			while ( preRow != row ) {
+		for ( let {
+			text, mag = 1, bold = false, color: fill = this.fill, width, row = 0
+		} of this.decoList ) {
+			$.assert( preRow <= row )
+			while ( preRow < row ) {
 				yBuf += yMax * 1.5
 				xBuf = 0, yMax = 1
 				preRow ++
@@ -381,8 +384,7 @@ export class DecoTextNode extends Node {
 			setShadow( { offset: b } )
 			ctx.fillText( text, x + xBuf, y + yBuf + h * size / 2 )
 
-			let metrics = ctx.measureText( text )
-			xBuf += metrics.width
+			xBuf += ctx.measureText( text ).width
 			if ( yMax < h * size ) yMax = h * size
 
 		}
@@ -392,6 +394,7 @@ export class DecoTextNode extends Node {
 	static measureWidth ( deco ) {
 
 		let { text, mag = 1, bold = false } = deco
+		if ( ! text ) return 0
 		ctx.font = `${ bold ? 'bold' : '' } ${ 100 * mag }px "Hiragino Kaku Gothic ProN", Meiryo`
 		return ctx.measureText( text ).width / 100
 	}
@@ -808,7 +811,7 @@ export function onPoint ( { type, x, y } ) {
 				node.pushed = false
 				if ( pointer.delete( node ) ) {
 					let time = timers.get( node ).get( )
-					if ( time < 750 ) node.fire( 'click' )
+					if ( time <= 1000 ) node.fire( 'click' )
 					else { onAction( 'menu' ); break W }
 				}
 			} break

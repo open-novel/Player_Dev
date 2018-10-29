@@ -413,69 +413,90 @@ export async function showMessage ( layer, name, text, speed ) {
 
 function decoText ( text ) {
 
-	let decoList = [ ], decoListList = [ ]
+	//$.log( 'texts', text )
 
-	let mag = 1, bold = false, color = undefined, row = 0
+	let decoList = [ ], decoLines = [ ], decoPages = [ ], overBuf = [ ]
+
+	let mag = 1, bold = false, color = undefined
 	let width = 0, height = 0, hMax = 1
 
+	decoLines.push( decoList )
 	for ( let unit of ( text.match( /\\\w(\[[\w.]+\])?|./gu ) || [ ] ) ) {
 		let magic = unit.match( /\\(\w)\[?([\w.]+)?\]?/ )
 		if ( magic ) {
 			let [ , type, val ] = magic
 			switch ( type ) {
 							case 'w': decoList.push( { wait: val || Infinity } )
-				break;	case 'n': newLine( )
+				break;	case 'n': { decoList = [ ], decoLines.push( decoList ) }
 				break;	case 'b': bold = true
 				break;	case 'B': bold = false
 				break;	case 'c': color = val
 				break;	case 'C': color = undefined
-				break;	case 's': { mag = val; if ( hMax < mag ) hMax = mag }
+				break;	case 's': mag = val
 				break;	case 'S': mag = 1
 				break;	default : $.warn( `"${ type }" このメタ文字は未実装です`　)
 			}
 		} else {
-			let deco = { text: unit, mag, bold, color, row }
-			width += Renderer.DecoTextNode.measureWidth( deco )
-			//$.log( width, height + hMax )
+			let deco = { text: unit, mag, bold, color }
+			deco.width = Renderer.DecoTextNode.measureWidth( deco )
 			decoList.push( deco )
-			if ( width > 32 ) {
-				//if ( unit.match( /[、。・,.]/ ) )
-				newLine( )
-			}
-
 		}
 
 	}
 
+	//$.log( 'lines', [ ...decoLines ] )
 
-	function newLine ( end = false ) {
-		height += hMax
-		if ( height > 3.2 ) {
-			let oldDecoList = [ ], newDecoList = [ ]
-			for ( let deco of decoList ) {
-				if ( deco.row == row && row != 0 ) {
-					deco.row = 0
-					newDecoList.push( deco )
-				} else oldDecoList.push( deco )
+	decoLines = decoLines.flatMap( decoList => {
+		let lines = [ ]
+		while ( decoList.length ) {
+
+			let lineWidth = 0
+			let line = [ ]
+			lines.push( line )
+
+			X: while ( decoList.length ) {
+				if ( lineWidth > 32 ) {
+					let temp = [ ]
+					while ( lineWidth > 30 ) {
+						let deco = line.pop( )
+						temp.unshift( deco )
+						lineWidth -= deco.width || 0
+					}
+					for ( let deco of temp.reverse( ) ) decoList.unshift( deco )
+					break X
+				}
+				let deco = decoList.shift( )
+				line.push( deco )
+				lineWidth += deco.width || 0
+				if ( lineWidth > 15 && deco.text && deco.text.match( /[、。）」』]/ ) ) break X
 			}
-			decoListList.push( oldDecoList )
-			decoList = newDecoList
 		}
-		if ( height > 3.2 ) {
-			//decoList.push( { wait: 0 } )
-			height = hMax; row = 0
+
+		return lines
+	} )
+
+	//$.log( 'lines', [ ...decoLines ] )
+
+	while ( decoLines.length ) {
+		let page = [ ], pageHeight = 0
+
+		X: while ( decoLines.length ) {
+			let line = decoLines.shift( )
+			pageHeight += line.reduce( ( max, deco ) => Math.max( max, deco.mag || 0 ), 0 )
+			if ( page.length > 0 && pageHeight > 3.3 ) {
+				decoLines.unshift( line )
+				break X
+			} else page.push( line )
 		}
-		hMax = mag
-		row ++; width = 0;
-		if ( end && decoList.length ) decoListList.push( decoList )
+		page = page.map( ( line, row ) => line.map( deco => ( { ...deco, row } ) ) ).flat( )
+		decoPages.push( page )
 	}
 
-	newLine( true )
-	$.log( decoListList )
-	return decoListList
+	$.log( 'pages', [ ...decoPages ] )
+
+	return decoPages
 
 }
-
 
 
 class ProgressTimer extends $.Awaiter {
@@ -746,6 +767,10 @@ async function removeImages ( targetGroup, kind ) {
 }
 
 
+export function hideIcons ( ) {
+	nowLayer.iconGroup.prop( 'o', 0 )
+}
+
 export async function sysChoices ( choices, opt ) {
 	return showChoices(  Object.assign( { layer: nowLayer, choices }, opt ) )
 }
@@ -849,6 +874,7 @@ export async function showChoices ( { layer, choices, inputBox = layer.menuBox, 
 
 
 	if ( menuEnebled ) {
+		layer.iconGroup.show( )
 		layer.menuLabels.children.forEach( label => label.prop( 'o', 0 ) )
 		layer.menuLabels[ menuType ].prop( 'o', 1 )
 	}

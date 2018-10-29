@@ -14,8 +14,11 @@ async function init ( { ctx, mode, installEvent, option } ) {
 	await play( { ctx, mode, installEvent, option } )
 }
 
+let installEvent = null, option = { }
+async function play ( { ctx, mode, installEvent: event, option: opt } ) {
 
-async function play ( { ctx, mode, installEvent, option } ) {
+	installEvent = event
+	option = opt
 
 
 	//let settings = await $.fetchFile( 'json', './プログラム/設定.json' )
@@ -30,10 +33,8 @@ async function play ( { ctx, mode, installEvent, option } ) {
 	let sound = 'off'
 	if ( mode != 'install' ) {
 
-
-
-	let text = `openノベルプレイヤー  ${ option.pwa ? '【 PWA Mode 】' : '' }\\n \\n` +
-		`${ settings[ 'バージョン' ][ 0 ] }${ $.channel.includes( 'Dev' ) ? '(開発版)' : '' }  ${ settings[ '更新年月日' ][ 0 ] } \\n`
+		let text = `openノベルプレイヤー  ${ option.pwa ? '【 PWA Mode 】' : '' }\\n \\n` +
+			`${ settings[ 'バージョン' ][ 0 ] }${ $.channel.includes( 'Dev' ) ? '(開発版)' : '' }  ${ settings[ '更新年月日' ][ 0 ] } \\n`
 
 
 		WHILE: while ( true ) {
@@ -41,44 +42,24 @@ async function play ( { ctx, mode, installEvent, option } ) {
 			Action.sysMessage( text, Infinity )
 
 			let list = [
-				{ label: '🔊　サウンドONで開始する ', value: 'on' },
-				{ label: '🔇　サウンドOFFで開始する', value: 'off' },
+				{ label: '🔊 音声ありで始める 🔊', value: 'on' },
+				{ label: '🔇 ミュートで始める 🔇', value: 'off' },
+				{ label: '🔰　チュートリアル　🔰', value: 'tutorial', disabled: true }
 			]
-			if ( ! option.pwa ) list.push(
-				{ label: '⏬　アプリとして登録する　', value: 'install' }
-			)
 
-			let select = await Action.sysChoices( list, { rowLen: 3, menuEnebled: false } )
-			if ( select == 'install' ) {
-			let result = await Promise.race( [ installEvent.promise, $.timeout( 1 ) ] )
-			if ( result ) {
-				let res = result.prompt( )
-				let choice = ( await result.userChoice ).outcome
-				$.log( choice )
-				if ( choice == 'accepted' ) {
-					Action.sysMessage( '登録が完了しました' )
-				} else {
-					Action.sysMessage( '登録が拒否されました' )
-				}
-				await Action.sysChoices( [ ], { backLabel: '戻る' } )
-
-			} else {
-				Action.sysMessage(
-					'ブラウザに認められなかったため登録できませんでした\\n' +
-					'（既に登録済みの可能性もあります）' )
-				await Action.sysChoices( [ ], { backLabel: '戻る' } )
-			}
-				continue WHILE
-			}
+			let promise = Action.sysChoices( list, { rowLen: 3, menuEnebled: false } )
+			Action.hideIcons( )
+			let select = await promise
 			sound = select
 			break WHILE
 		}
+
+
+
+		if ( sound == 'on' ) Action.setMainVolume( 1 )
+		else Action.setMainVolume( 0 )
+
 	}
-
-
-
-	if ( sound == 'on' ) Action.setMainVolume( 1 )
-	else Action.setMainVolume( 0 )
 
 	while ( true ) {
 
@@ -233,10 +214,14 @@ async function showSysMenu ( ) {
 		let sel = await Action.sysChoices(
 			[
 				'受信チャンネル設定',
+				{
+					label: 'プレイヤーを登録する',
+					disabled: option.pwa || ! installEvent
+				},
 				'データ保存状況確認',
 				{
 					label: '🔧　実験機能　🔨',
-					'value': '実験機能'
+					value: '実験機能'
 				}
 			], { backLabel: '戻る', color: 'green' }
 		)
@@ -253,13 +238,13 @@ async function showSysMenu ( ) {
 				Action.sysMessage(
 					'プレイヤーの受信チャンネルを選択してください\\n' +
 					'安定版：　通常はこちらを選択してください\\n' +
-					'開発版：　安定版より約１周間早く新機能を試せますが不安定です\\n'
+					'開発版：　安定版より数週間早く新機能を試せますが不安定です\\n'
 				)
 				let isStable = ! $.channel
 				let sel = await Action.sysChoices(
 					[
-						{ label: '安定版' + ( isStable ? '（📡受信中）' : '　　　　　　' ), value: '安定版' },
-						{ label: '開発版' + ( isStable ? '　　　　　　' : '（📡受信中）' ), value: '開発版' }
+						{ label: '安定版' + ( isStable ? '（📡受信中）' : '　　　　　　' ), value: '安定版', disabled: isStable },
+						{ label: '開発版' + ( isStable ? '　　　　　　' : '（📡受信中）' ), value: '開発版', disabled: !isStable }
 					], { backLabel: '戻る', color: 'green' }
 				)
 
@@ -276,7 +261,27 @@ async function showSysMenu ( ) {
 				await $.neverDone
 
 			} break
+			case 'プレイヤーを登録する': {
+				let result = await Promise.race( [ installEvent.promise, $.timeout( 1 ) ] )
+				installEvent = null
+				if ( result ) {
+					let res = result.prompt( )
+					let choice = ( await result.userChoice ).outcome
+					$.log( choice )
+					if ( choice == 'accepted' ) {
+						Action.sysMessage( '登録が完了しました' )
+					} else {
+						Action.sysMessage( '登録が拒否されました' )
+					}
+					await Action.sysChoices( [ ], { backLabel: '戻る' } )
 
+				} else {
+					Action.sysMessage(
+						'ブラウザに認められなかったため登録できませんでした\\n' +
+						'（既に登録済みの可能性もあります）' )
+					await Action.sysChoices( [ ], { backLabel: '戻る' } )
+				}
+			} break
 			case 'データ保存状況確認': WHILE2: while ( true ) {
 
 				let { usage, quota } = await navigator.storage.estimate( )
