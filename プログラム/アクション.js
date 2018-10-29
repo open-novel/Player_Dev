@@ -468,7 +468,7 @@ function decoText ( text ) {
 				let deco = decoList.shift( )
 				line.push( deco )
 				lineWidth += deco.width || 0
-				if ( lineWidth > 15 && deco.text && deco.text.match( /[、。）」』]/ ) ) break X
+				if ( lineWidth > 20 && deco.text && deco.text.match( /[、。）」』]/ ) ) break X
 			}
 		}
 

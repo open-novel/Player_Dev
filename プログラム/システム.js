@@ -453,7 +453,7 @@ async function installScenario ( index, sel ) {
 	if ( ! sel ) {
 		Action.sysMessage( 'インストール方法を選んで下さい', 100 )
 
-		let menuList = [ 'フォルダから', 'Zipファイルから', 'Webから' ].map( label => ( { label } ) )
+		let menuList = [ '作品リストから', 'フォルダから', 'Zipファイルから' ].map( label => ( { label } ) )
 
 		sel = await Action.sysChoices( menuList, { backLabel: '戻る' } )
 	}
@@ -469,6 +469,17 @@ async function installScenario ( index, sel ) {
 		case $.Token.close:
 			return sel
 
+		case '作品リストから': {
+
+			Action.sysMessage( '作品を公開しているWebサイトで'
+			+'\\n作品リンクをクリックするとインストールできます' )
+			window.open( 'https://github.com/open-novel/open-novel.github.io/wiki/作品リンク集' )
+
+			await Action.sysChoices( [ ], { backLabel: '戻る' } )
+			return $.Token.back
+
+
+		} break
 		case 'フォルダから': {
 
 			Action.sysMessage( 'フォルダを選んで下さい' )
@@ -486,16 +497,6 @@ async function installScenario ( index, sel ) {
 			if ( $.isToken( files ) ) return files
 			files = await unpackFile( files[ 0 ] )
 			origin = 'local/'
-
-		} break
-		case 'Webから': {
-
-			Action.sysMessage( 'openノベルプレイヤー向けに作品を公開しているサイトで'
-			+'\\n作品のリンクをクリックするとここへインストールできます' )
-
-			await Action.sysChoices( [ ], { backLabel: '戻る' } )
-			return $.Token.back
-
 
 		} break
 		case 'リンクから': {
