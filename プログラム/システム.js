@@ -92,17 +92,25 @@ async function playSystemOpening ( mode ) {
 	$.log( titleList )
 
 	let cho, page = 1
+	let noImage = await $.getImage( await $.fetchFile( './画像/画像なし.svg' ) )
 
 	while ( true ) {
 
 		let list = await Promise.all( [ ...Array( 6 ).keys( ) ].map( async i => {
-			let index = i + ( page - 1 ) * 6 + 1, settings = titleList[ index ] || { }, { title, origin } = settings
-			let file = title ? await $.getFile( `${ origin }${ title }/背景/サムネイル` ).catch( e => null ) : null
-			let bgimage = file ? await $.getImage( file ) : null
-			return {
-				label: title ? title : '--------',
-				value: { settings, index },
-				bgimage
+			return async function * ( ) {
+				let index = i + ( page - 1 ) * 6 + 1, settings = titleList[ index ] || { }, { title, origin } = settings
+				yield {
+					label: title ? title : '--------',
+					value: { settings, index },
+					bgimage: true
+				}
+				let file = title ? await $.getFile( `${ origin }${ title }/背景/サムネイル` ).catch( e => null ) : null
+				let image = file ? await $.getImage( file ) : noImage
+				yield {
+					label: title ? title : '--------',
+					value: { settings, index },
+					bgimage: image
+				}
 			}
 		} ) )
 

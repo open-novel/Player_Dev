@@ -815,16 +815,15 @@ export async function showChoices ( { layer, choices, inputBox = layer.menuBox, 
 			name: 'choiceBox',
 			x, y, w, h, listenerMode: 'listen',
 			disabled,
-			//fill:  'rgba( 0, 225, 255, 1 )',
+			fill: bgimage ? 'rgba( 127, 127, 127, 1 )' : '',
 			sound: ! disabled
 		} )
 		inputBox.append( choiceBox )
 
-		if ( bgimage ) {
-			let image = new Renderer.ImageNode( { name: 'bgimage', img: bgimage, o: .5, clip: true } )
-			choiceBox.append( image )
-			$.log( 'image!!', bgimage )
-		}
+		let image  = new Renderer.ImageNode( {
+			name: 'bgimage', img: bgimage, o: .75, clip: true, listenerMode: 'listen'
+		} )
+		choiceBox.append( image )
 
 		let textArea = new Renderer.TextNode( {
 			name: 'choiceText',
@@ -848,10 +847,14 @@ export async function showChoices ( { layer, choices, inputBox = layer.menuBox, 
 		async function observe( ) {
 			for await ( let obj of cho( ) ) {
 				$.log( 'obj', obj )
-				;( { label = '', value = undefined, disabled = false } = obj )
+				;( { label = '', value = undefined, disabled = false, bgimage = null } = obj )
 				textArea.set( obj.label )
 				value = obj.value
 				choiceBox.disabled = disabled
+				image.img = bgimage
+				textArea.prop( 'size', bgimage ? .35 : .7 )
+				textArea.prop( 'y', bgimage ? .55 : .05 )
+				//if ( Object( bgimage ) === bgimage ) image.show( )
 			}
 		}
 

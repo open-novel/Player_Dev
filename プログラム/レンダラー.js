@@ -169,13 +169,13 @@ class Node {
 	}
 
 
-	show ( duration ) {
+	show ( duration, max ) {
 
-		return anime( this, 'show', duration )
+		return anime( this, 'show', duration, max )
 
 	}
 
-	hide ( duration ) {
+	hide ( duration) {
 
 		return anime( this, 'hide', duration )
 
@@ -441,9 +441,10 @@ export class ImageNode extends Node {
 	}
 
 	draw ( { ctx, x, y, w, h } ) {
-		let { img, fill, clip } = this
+		let { img, fill, clip, pushed } = this
 		if ( clip ) {
-			const r = H * .02
+			const r = H * .02, offset = H * .01
+			if ( pushed ) { x += offset / 2, y += offset / 2 }
 			ctx.beginPath( )
 			ctx.moveTo( x, y )
 			ctx.arcTo( x + w, y, x + w, y + h, r )
@@ -453,7 +454,7 @@ export class ImageNode extends Node {
 			ctx.closePath( )
 			ctx.clip( )
 		}
-		if ( img ) ctx.drawImage( img, x, y, w, h )
+		if ( Object( img ) === img ) ctx.drawImage( img, x, y, w, h )
 		else if ( fill ) {
 			ctx.fillStyle = fill
 			ctx.fillRect( x, y, w, h )
