@@ -441,7 +441,18 @@ export class ImageNode extends Node {
 	}
 
 	draw ( { ctx, x, y, w, h } ) {
-		let { img, fill } = this
+		let { img, fill, clip } = this
+		if ( clip ) {
+			const r = H * .02
+			ctx.beginPath( )
+			ctx.moveTo( x, y )
+			ctx.arcTo( x + w, y, x + w, y + h, r )
+			ctx.arcTo( x + w, y + h, x, y + h, r )
+			ctx.arcTo( x, y + h, x, y, r )
+			ctx.arcTo( x, y, x + w, y, r )
+			ctx.closePath( )
+			ctx.clip( )
+		}
 		if ( img ) ctx.drawImage( img, x, y, w, h )
 		else if ( fill ) {
 			ctx.fillStyle = fill
@@ -547,7 +558,7 @@ function initLayer ( ) {
 					},
 					{
 						type: TextNode, name: 'currentLabel',
-						x: 0.45, y: 0.68, w: .1, h: .3,
+						x: 0.45, y: 0.69, w: .1, h: .3,
 						pos: 'center', size: .15
 					},
 					{
@@ -563,20 +574,20 @@ function initLayer ( ) {
 					{
 						type: PolygonNode, name: 'menuButton', listenerMode: 'opaque',
 						fill: 'rgba( 255, 200, 200, .25 )', event: 'menu',
-						path: [ [ .005, .80 ], [ .005, .99 ], [ .133, .99 ] ], sound: true
+						path: [ [ .005, .77 ], [ .005, .99 ], [ .133, .99 ] ], sound: true
 					},
 					{
 						type: GroupNode, name: 'menuLabels',
 						children: [
 							{
 								type: TextNode, name: 'open', o: 1,
-								y: .785, w: .175, fill: 'rgba( 255, 255, 255, .5 )', text: 'open menu',
-								pos: 'center', size: .037, rotate: 40
+								y: .76, w: .19, fill: 'rgba( 255, 255, 255, .5 )', text: 'open menu',
+								pos: 'center', size: .037, rotate: 44
 							},
 							{
 								type: TextNode, name: 'close', o: 0,
-								y: .785, w: .175, fill: 'rgba( 255, 255, 255, .5 )', text: 'close menu',
-								pos: 'center', size: .037, rotate: 40
+								y: .76, w: .19, fill: 'rgba( 255, 255, 255, .5 )', text: 'close menu',
+								pos: 'center', size: .037, rotate: 44
 							},
 							{
 								type: TextNode, name: 'top', o: 0,

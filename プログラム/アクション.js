@@ -78,7 +78,7 @@ const frame = new $.Awaiter
 } ) ( )
 
 
-const action = new $.Awaiter
+//const action = new $.Awaiter
 export function onAction ( type ) {
 
 	//$.log( type )
@@ -123,7 +123,7 @@ export async function showSaveLoad ( { layer, title, isLoad = false, color } ) {
 	while ( page > 0 ) {
 
 		let start = ( page - 1 ) * visibleTileNo
-		let choices = await $.getSaveChoices ( { title, start: ( isLoad && page == totalPageNo ) ? 1000 : start, num: visibleTileNo, isLoad } )
+		let choices = await $.getSaveChoices( { title, start: ( isLoad && page == totalPageNo ) ? 1000 : start, num: visibleTileNo, isLoad } )
 
 		let backLabel = page > 1 ? `ページ ${ page - 1 }` : '戻る'
 		let currentLabel = `ページ ${ page }`
@@ -239,7 +239,7 @@ async function showMenu ( layer ) {
 	WHILE: while ( true ) {
 
 		let type = await sysChoices(
-			[ 'セーブ', 'ロード', '会話ログ', 'シェアする', '終了する' ],
+			[ 'セーブ', 'ロード', '会話ログ', 'シェアする', '会話欄非表示', '終了する' ],
 			{ rowLen: 4, backLabel: '戻る', color: 'green' }
 		)
 
@@ -305,9 +305,11 @@ async function showMenu ( layer ) {
 					let url = `https://${ type }?text=`+ encodeURIComponent(
 						`『${ title }』をプレイしています。\nby Openノベルプレイヤー https://open-novel.github.io` )
 					window.open( url )
+					//layer.conversationBox.prop( 'o', 0 )
 					if ( capture ) {
 						layer.menuBox.prop( 'o', 0 )
 						layer.buttonGroup.prop( 'o', 0 )
+						layer.iconGroup.prop( 'o', 0 )
 						Renderer.drawCanvas( )
 						$.download( await Renderer.toBlob( hiquality ), title )
 						layer.menuBox.prop( 'o', 1 )
@@ -315,6 +317,15 @@ async function showMenu ( layer ) {
 					}
 					break WHILE2
 				}
+
+			} break
+			case '会話欄非表示': {
+
+				let p = sysChoices( [ ], { } )
+				nowLayer.conversationBox.hide( )
+				nowLayer.iconGroup.hide( )
+				await p
+				nowLayer.conversationBox.show( )
 
 			} break
 			case '終了する': {
@@ -794,7 +805,7 @@ export async function showChoices ( { layer, choices, inputBox = layer.menuBox, 
 
 	for ( let i = 0; i < len; i++ ) {
 		let cho = choices[ i ]
-		let { label = '', value = label, disabled = false } =
+		let { label = '', value = label, disabled = false, bgimage = null } =
 			( cho === Object( cho ) ) ? cho : { label: cho }
 		if ( ! label ) disabled = true
 		let row = i % rowLen, col = i / rowLen | 0
@@ -809,9 +820,17 @@ export async function showChoices ( { layer, choices, inputBox = layer.menuBox, 
 		} )
 		inputBox.append( choiceBox )
 
+		if ( bgimage ) {
+			let image = new Renderer.ImageNode( { name: 'bgimage', img: bgimage, o: .5, clip: true } )
+			choiceBox.append( image )
+			$.log( 'image!!', bgimage )
+		}
+
 		let textArea = new Renderer.TextNode( {
 			name: 'choiceText',
-			size: .7, y: .05, pos: 'center'
+			size: bgimage ? .35 : .7,
+			y: bgimage ? .55 : .05,
+			pos: 'center'
 		} )
 		choiceBox.append( textArea )
 

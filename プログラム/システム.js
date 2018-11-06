@@ -91,15 +91,33 @@ async function playSystemOpening ( mode ) {
 
 	$.log( titleList )
 
-	titleList = [ ...Array( 12 ).keys( ) ].map( i => {
-		let index = i + 1, settings = titleList[ index ] || { }, { title } = settings
-		return {
-			label: title ? title : '--------', value: { settings, index }
-		}
-	} )
+	let cho, page = 1
 
+	while ( true ) {
 
-	let cho = await Action.sysChoices( titleList, { menuType: 'open' } )
+		let list = await Promise.all( [ ...Array( 6 ).keys( ) ].map( async i => {
+			let index = i + ( page - 1 ) * 6 + 1, settings = titleList[ index ] || { }, { title, origin } = settings
+			let file = title ? await $.getFile( `${ origin }${ title }/背景/サムネイル` ).catch( e => null ) : null
+			let bgimage = file ? await $.getImage( file ) : null
+			return {
+				label: title ? title : '--------',
+				value: { settings, index },
+				bgimage
+			}
+		} ) )
+
+		cho = await Action.sysChoices( list, {
+			rowLen: 2, menuType: 'open',
+			backLabel: ( page > 1 ? `ページ${ page - 1 }` : '' ),
+			currentLabel: `ページ${ page }`,
+			nextLabel: ( page < 3 ? `ページ${ page + 1 }` : '' ),
+		} )
+
+		if ( cho == $.Token.back ) page --
+		else if ( cho == $.Token.next ) page ++
+		else break
+
+	}
 
 	if ( cho == $.Token.close ) {
 		await showSysMenu( )
