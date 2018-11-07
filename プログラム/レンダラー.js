@@ -23,9 +23,8 @@ async function init ( opt ) {
 }
 
 function setCtxOptions ( ) {
-	//ctx.imageSmoothingEnabled = true
-	//ctx.imageSmoothingQuality = 'high'
-
+	ctx.imageSmoothingEnabled = true
+	ctx.imageSmoothingQuality = 'high'
 }
 
 export function toBlob( hiquality ) {
