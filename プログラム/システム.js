@@ -239,17 +239,21 @@ async function showSysMenu ( ) {
 
 		let sel = await Action.sysChoices(
 			[
+				
 				'受信チャンネル設定',
-				{
-					label: 'プレイヤーを登録する',
-					disabled: option.pwa || ! installEvent
-				},
+				'プレイヤーを登録する',
 				'データ保存状況確認',
 				{
 					label: '🔧　実験機能　🔨',
 					value: '実験機能'
-				}
-			], { backLabel: '戻る', color: 'green' }
+				},
+
+				{ label: '🔗公式サイト　', value: '公式サイトリンク' },
+				{ label: '🔗作品一覧　　', value: '作品一覧リンク' },
+				{ label: '🔗操作方法Wiki', value: '操作方法リンク' },
+				{ label: '🔗open2chスレ', value: '制作スレリンク' },
+
+			], { backLabel: '戻る', color: 'green', rowLen: 4 }
 		)
 
 		$.log( sel )
@@ -259,6 +263,15 @@ async function showSysMenu ( ) {
 			case $.Token.back:
 			case $.Token.close:
 				break WHILE
+
+			case '公式サイトリンク': window.open( 'https://open-novel.github.io/source/' )
+			break
+			case '作品一覧リンク': window.open( 'https://github.com/open-novel/open-novel.github.io/wiki/作品リンク集/' )
+			break
+			case '操作方法リンク': window.open( 'https://github.com/open-novel/open-novel.github.io/wiki/' )
+			break
+			case '制作スレリンク': window.open( 'http://hayabusa.open2ch.net/test/read.cgi/news4vip/1537182605/l50' )
+			break
 
 			case '受信チャンネル設定': {
 				Action.sysMessage(

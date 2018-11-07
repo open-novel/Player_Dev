@@ -342,6 +342,11 @@ export class TextNode extends Node {
 
 		if ( fill ) {
 			if( shadow ) setShadow( { offset: b } )
+
+			ctx.strokeStyle = 'rgba( 127, 127, 127, .5 )'
+			ctx.lineWidth = h * size * .1
+			ctx.strokeText( text, x, y + h * size, w - b )
+
 			ctx.fillStyle = fill
 			ctx.fillText( text, x, y + h * size, w - b )
 
@@ -384,10 +389,15 @@ export class DecoTextNode extends Node {
 			ctx.font = `${ bold ? 'bold' : '' } ${ h * size }px "Hiragino Kaku Gothic ProN", Meiryo`
 			//ctx.textBaseline = 'top'
 
-			let b = ( h *  size )  * .025 + 2.5
+			let b = h *  size * .025 + 2.5
+
+			setShadow( { offset: b } )
+
+			ctx.strokeStyle = 'rgba( 0, 0, 0, .5 )'
+			ctx.lineWidth = h * size * .2
+			ctx.strokeText( text, x + xBuf, y + yBuf + h * size / 2 )
 
 			ctx.fillStyle = fill
-			setShadow( { offset: b } )
 			ctx.fillText( text, x + xBuf, y + yBuf + h * size / 2 )
 
 			xBuf += ctx.measureText( text ).width
