@@ -33,7 +33,7 @@ async function play ( { ctx, mode, installEvent: event, option: opt } ) {
 	let sound = 'off'
 	if ( mode != 'install' ) {
 
-		let text = `openノベルプレイヤー  ${ option.pwa ? '【 PWA Mode 】' : '' }\\n \\n` +
+		let text = `openノベルプレイヤー\\n \\n` +
 			`${ settings[ 'バージョン' ][ 0 ] }${ $.channel.includes( 'Dev' ) ? '(開発版)' : '' }  ${ settings[ '更新年月日' ][ 0 ] } \\n`
 
 
@@ -118,7 +118,7 @@ async function playSystemOpening ( mode ) {
 			rowLen: 2, menuType: 'open',
 			backLabel: ( page > 1 ? `ページ${ page - 1 }` : '' ),
 			currentLabel: `ページ${ page }`,
-			nextLabel: ( page < 3 ? `ページ${ page + 1 }` : '' ),
+			nextLabel: ( page < 5 ? `ページ${ page + 1 }` : '' ),
 		} )
 
 		if ( cho == $.Token.back ) page --
@@ -650,12 +650,13 @@ async function installScenario ( index, sel ) {
 		let input = document.createElement( 'input' )
 		input.type = 'file'
 		input.webkitdirectory = folder
-		input.onchange = ( ) => player.fire( 'file', input.files )
+		let { promise, resolve } = new $.Deferred
+		input.onchange = ( ) => resolve( input.files )
 		input.click( )
 
-		let files = await (new Action.Trigger).stepOr(
-			player.on( 'file' ), Action.sysChoices( [ ], { backLabel: '戻る' } )
-		)
+		let files = await Promise.race( [
+			promise, Action.sysChoices( [ ], { backLabel: '戻る' } )
+		] )
 		if ( $.isToken( files ) ) return files
 		if ( files ) return Array.from( files )
 		else return $.Token.failure

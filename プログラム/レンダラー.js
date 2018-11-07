@@ -18,7 +18,14 @@ async function init ( opt ) {
 
 	ctx = opt.ctx || ctx
 	DPCanvas = ctx.canvas
+	setCtxOptions( )
 	return await initLayer( )
+}
+
+function setCtxOptions ( ) {
+	//ctx.imageSmoothingEnabled = true
+	//ctx.imageSmoothingQuality = 'high'
+
 }
 
 export function toBlob( hiquality ) {
@@ -508,15 +515,15 @@ function initLayer ( ) {
 			},
 			{
 				type: RectangleNode, name: 'conversationBox',
-				y: .78, h: .22, shadow: false, fill: 'rgba( 0, 0, 100, .5 )',
+				y: .75, h: .25, shadow: false, fill: 'rgba( 0, 0, 100, .5 )',
 				children: [
 					{
 						type: DecoTextNode, name: 'nameArea',
-						x: .05, w: .1, y: .2, size: .175, fill: 'rgba( 255, 255, 200, .9 )'
+						x: .05, w: .1, y: .18, size: .175, fill: 'rgba( 255, 255, 220, 1 )'
 					},
 					{
 						type: DecoTextNode, name: 'messageArea',
-						x: .2, w: .75, y: .2, size: .175, fill: 'rgba( 255, 255, 200, .9 )'
+						x: .2, w: .75, y: .18, size: .175, fill: 'rgba( 255, 255, 220, 1 )'
 					},
 				]
 			},
@@ -575,20 +582,20 @@ function initLayer ( ) {
 					{
 						type: PolygonNode, name: 'menuButton', listenerMode: 'opaque',
 						fill: 'rgba( 255, 200, 200, .25 )', event: 'menu',
-						path: [ [ .005, .77 ], [ .005, .99 ], [ .133, .99 ] ], sound: true
+						path: [ [ .005, .74 ], [ .005, .99 ], [ .142, .99 ] ], sound: true
 					},
 					{
 						type: GroupNode, name: 'menuLabels',
 						children: [
 							{
 								type: TextNode, name: 'open', o: 1,
-								y: .76, w: .19, fill: 'rgba( 255, 255, 255, .5 )', text: 'open menu',
-								pos: 'center', size: .037, rotate: 44
+								y: .74, w: .2, fill: 'rgba( 255, 255, 255, .5 )', text: 'open menu',
+								pos: 'center', size: .04, rotate: 45
 							},
 							{
 								type: TextNode, name: 'close', o: 0,
-								y: .76, w: .19, fill: 'rgba( 255, 255, 255, .5 )', text: 'close menu',
-								pos: 'center', size: .037, rotate: 44
+								y: .74, w: .2, fill: 'rgba( 255, 255, 255, .5 )', text: 'close menu',
+								pos: 'center', size: .04, rotate: 45
 							},
 							{
 								type: TextNode, name: 'top', o: 0,
@@ -823,7 +830,7 @@ export function onPoint ( { type, x, y } ) {
 				node.pushed = false
 				if ( pointer.delete( node ) ) {
 					let time = timers.get( node ).get( )
-					if ( time <= 1000 ) node.fire( 'click' )
+					if ( time <= 2000 ) node.fire( 'click' )
 					else { onAction( 'menu' ); break W }
 				}
 			} break

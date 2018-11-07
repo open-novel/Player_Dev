@@ -462,13 +462,18 @@ function decoText ( text ) {
 		while ( decoList.length ) {
 
 			let lineWidth = 0
-			let line = [ ]
+			let line = [ ], lastMatch = null
 			lines.push( line )
 
 			X: while ( decoList.length ) {
 				if ( lineWidth > 32 ) {
 					let temp = [ ]
-					while ( lineWidth > 30 ) {
+
+					if ( lastMatch ) while ( true ) {
+						let deco = line.pop( )
+						if ( deco == lastMatch ) break
+						temp.unshift( deco )
+					} else while ( lineWidth > 30 ) {
 						let deco = line.pop( )
 						temp.unshift( deco )
 						lineWidth -= deco.width || 0
@@ -479,7 +484,10 @@ function decoText ( text ) {
 				let deco = decoList.shift( )
 				line.push( deco )
 				lineWidth += deco.width || 0
-				if ( lineWidth > 20 && deco.text && deco.text.match( /[、。）」』]/ ) ) break X
+				let chars = [ ... ',.!?)]、。！？）」』' ]
+				if ( lineWidth > 20 && deco.text && chars.includes( deco.text ) ) {
+					lastMatch = deco
+				}
 			}
 		}
 
