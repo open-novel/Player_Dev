@@ -574,13 +574,13 @@ async function installScenario ( index, sel ) {
 
 		Action.sysMessage( '提供サイトリストを取得中……' )
 
-		let url = 'https://github.com/open-novel/open-novel.github.io/wiki/作品リンク集'
-		let dom = ( new DOMParser ).parseFromString( await $.fetchFile( url, 'text' ), 'text/html' )
-		let linkList = Array.from( dom.querySelectorAll( '.markdown-body li a' ), a => {
-			return [ a.innerText, a.href ]
-		} )
+		//let url = 'https://github.com/open-novel/open-novel.github.io/wiki/作品リンク集'
+		//let dom = ( new DOMParser ).parseFromString( await $.fetchFile( url, 'text' ), 'text/html' )
+		//let linkList = Array.from( dom.querySelectorAll( '.markdown-body li a' ), a => {
+		//	return [ a.innerText, a.href ]
+		//} )
 
-		//let linkList = [ { label: '旧作品集', value: 'https://open-novel.github.io/Products/' } ]
+		let linkList = [ { label: '旧作品集', value: 'https://open-novel.github.io/Products/' } ]
 
 		Action.sysMessage( '作品集を選んでください' )
 		let sel = await Action.sysChoices( linkList, { backLabel: '戻る' } )
