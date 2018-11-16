@@ -599,6 +599,8 @@ async function installScenario ( index, sel ) {
 		sel = await Action.sysChoices( titleList, { backLabel: '戻る' } )
 		if ( $.isToken( sel ) ) return sel
 
+		data.port.postMessage( { selectedIndex: sel } )
+
 		return playSystemOpening ( 'install' )
 
 	}
