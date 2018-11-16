@@ -517,7 +517,7 @@ async function installScenario ( index, sel ) {
 			let res = await installByScenarioList( )
 			if ( res == $.Token.back ) return installScenario( index )
 			if ( $.isToken( files ) ) return files
-			return $.Token.failure
+			return $.Token.success
 
 		} break
 		case 'フォルダから': {
@@ -575,14 +575,14 @@ async function installScenario ( index, sel ) {
 		Action.sysMessage( '提供サイトリストを取得中……' )
 
 		let url = 'https://github.com/open-novel/open-novel.github.io/wiki/作品リンク集'
-		//let dom = ( new DOMParser ).parseFromString( await $.fetchFile( url, 'text' ), 'text/html' )
-		//let linkList = Array.from( dom.querySelectorAll( '.markdown-body li a' ), a => {
-		//	return [ a.innerText, a.href ]
-		//} )
+		let dom = ( new DOMParser ).parseFromString( await $.fetchFile( url, 'text' ), 'text/html' )
+		let linkList = Array.from( dom.querySelectorAll( '.markdown-body li a' ), a => {
+			return [ a.innerText, a.href ]
+		} )
 
-		let linkList = [ { label: '旧作品集', value: 'https://open-novel.github.io/Products/' } ]
+		//let linkList = [ { label: '旧作品集', value: 'https://open-novel.github.io/Products/' } ]
 
-		Action.sysMessage( 'インストールしたい作品集を選んでください' )
+		Action.sysMessage( '作品集を選んでください' )
 		let sel = await Action.sysChoices( linkList, { backLabel: '戻る' } )
 		if ( $.isToken( sel ) ) return sel
 		$.log( linkList )
@@ -595,8 +595,11 @@ async function installScenario ( index, sel ) {
 
 		let data = await player.on( 'install', true )
 		if ( ! data || ! data.list ) return $.Token.failure
+
+		Action.sysMessage( 'インストールする作品を選んでください' )
 		let titleList = data.list.map( ( t, i ) => ( { label: t, value: i } ) )
 		sel = await Action.sysChoices( titleList, { backLabel: '戻る' } )
+		if ( sel == $.Token.back ) return installByScenarioList( )
 		if ( $.isToken( sel ) ) return sel
 
 		data.port.postMessage( { selectedIndex: sel } )
