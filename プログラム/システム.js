@@ -601,7 +601,7 @@ async function installScenario ( index, sel ) {
 
 		data.port.postMessage( { selectedIndex: sel } )
 
-		return playSystemOpening ( 'install' )
+		return installScenario( index, 'リンクから' )
 
 	}
 
