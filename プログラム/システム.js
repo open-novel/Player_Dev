@@ -510,13 +510,14 @@ async function installScenario ( index, sel ) {
 
 		case '作品リストから': {
 
-			Action.sysMessage( '作品を公開しているWebサイトで'
-			+'\\n作品リンクをクリックするとインストールできます' )
-			window.open( 'https://github.com/open-novel/open-novel.github.io/wiki/作品リンク集' )
+			//Action.sysMessage( '作品を公開しているWebサイトで'
+			//+'\\n作品リンクをクリックするとインストールできます' )
+			//window.open( 'https://github.com/open-novel/open-novel.github.io/wiki/作品リンク集' )
 
-			await Action.sysChoices( [ ], { backLabel: '戻る' } )
-			return $.Token.back
-
+			let res = await installByScenarioList( )
+			if ( res == $.Token.back ) return installScenario( index )
+			if ( $.isToken( files ) ) return files
+			return $.Token.failure
 
 		} break
 		case 'フォルダから': {
@@ -567,6 +568,40 @@ async function installScenario ( index, sel ) {
 	}
 
 	if ( ! files ) return $.Token.failure
+
+
+	async function installByScenarioList ( ) {
+
+		Action.sysMessage( '提供サイトリストを取得中……' )
+
+		let url = 'https://github.com/open-novel/open-novel.github.io/wiki/作品リンク集'
+		//let dom = ( new DOMParser ).parseFromString( await $.fetchFile( url, 'text' ), 'text/html' )
+		//let linkList = Array.from( dom.querySelectorAll( '.markdown-body li a' ), a => {
+		//	return [ a.innerText, a.href ]
+		//} )
+
+		let linkList = [ { label: '旧作品集', value: 'https://open-novel.github.io/Products/' } ]
+
+		Action.sysMessage( 'インストールしたい作品集を選んでください' )
+		let sel = await Action.sysChoices( linkList, { backLabel: '戻る' } )
+		if ( $.isToken( sel ) ) return sel
+		$.log( linkList )
+
+		Action.sysMessage( '作品リストを取得中……' )
+
+		let iframe = document.createElement( 'iframe' )
+		iframe.src = sel
+		document.body.append( iframe )
+
+		let data = await player.on( 'install', true )
+		if ( ! data || ! data.list ) return $.Token.failure
+		let titleList = data.list.map( ( t, i ) => ( { label: t, value: i } ) )
+		sel = await Action.sysChoices( titleList, { backLabel: '戻る' } )
+		if ( $.isToken( sel ) ) return sel
+
+		return playSystemOpening ( 'install' )
+
+	}
 
 
 	async function unpackFile ( zip ) {

@@ -829,7 +829,8 @@ export async function showChoices ( { layer, choices, inputBox = layer.menuBox, 
 		inputBox.append( choiceBox )
 
 		let image  = new Renderer.ImageNode( {
-			name: 'bgimage', img: bgimage, o: .75, clip: true, listenerMode: 'listen'
+			name: 'bgimage', img: bgimage, o: .75, clip: true,
+			listenerMode: 'listen', sound: ! disabled
 		} )
 		choiceBox.append( image )
 
