@@ -587,12 +587,12 @@ async function installScenario ( index, sel ) {
 
 		Action.sysMessage( 'インストールする作品を選んでください' )
 
-		let titleList = data.list.filter( t => !! t )
+		let titleList = data.list.filter( o => !! o.title )
 		let noImage = await $.getImage( await $.fetchFile( './画像/画像なし.svg' ) )
 
 		sel = await Action.sysPageChoices( async function * ( index ) {
 
-			let title = titleList[ index ]
+			let title = titleList[ index ].title
 
 			yield {
 				label: title ? title : '------',
