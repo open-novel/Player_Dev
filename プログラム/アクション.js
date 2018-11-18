@@ -931,7 +931,7 @@ export async function showChoices ( { layer, choices, inputBox = layer.menuBox, 
 
 }
 
-export async function sysPageChoices ( dataYielder ) {
+export async function sysPageChoices ( dataYielder, { maxPages = 5, menuType } ) {
 
 	let cho, page = 1
 
@@ -943,15 +943,16 @@ export async function sysPageChoices ( dataYielder ) {
 		} ) )
 
 		cho = await sysChoices( list, {
-			rowLen: 2, menuType: 'open',
-			backLabel: ( page > 1 ? `ページ${ page - 1 }` : '' ),
+			rowLen: 2, menuType,
+			backLabel: ( page > 1 ? `ページ${ page - 1 }` : '戻る' ),
 			currentLabel: `ページ${ page }`,
-			nextLabel: ( page < 5 ? `ページ${ page + 1 }` : '' ),
+			nextLabel: ( page < maxPages ? `ページ${ page + 1 }` : '' ),
 		} )
 
 		if ( cho == $.Token.back ) page --
 		else if ( cho == $.Token.next ) page ++
 		else break
+		if ( page <= 0 ) return $.Token.back
 	}
 
 	return cho

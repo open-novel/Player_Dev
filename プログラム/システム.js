@@ -114,7 +114,12 @@ async function playSystemOpening ( mode ) {
 			value: { settings, index },
 			bgimage: image
 		}
-	} )
+	}, { maxPages: 5, menuType: 'open' } )
+
+	if ( cho == $.Token.back ) {
+		location.reload( )
+		await $.neverDone
+	}
 
 	if ( cho == $.Token.close ) {
 		await showSysMenu( )
@@ -140,10 +145,9 @@ async function playSystemOpening ( mode ) {
 		let success = await installScenario( index, 'リンクから' )
 		if ( success == $.Token.success ) Action.sysMessage( 'インストールが完了しました' )
 		else Action.sysMessage( 'インストールできませんでした' )
-		await Action.sysChoices( [ ], { backLabel: 'リセットする' } )
+		await Action.sysChoices( [ ], { backLabel: '作品選択へ' } )
 		location.hash = ''
-		location.reload( )
-		await $.neverDone
+		return playSystemOpening( { mode: undefined } )
 
 	}
 	// シナリオ開始メニュー表示
@@ -504,6 +508,7 @@ async function installScenario ( index, sel ) {
 
 			let res = await installByScenarioList( )
 			if ( res == $.Token.back ) return installScenario( index )
+			if ( res == $.Token.close ) return $.Token.close
 			if ( $.isToken( files ) ) return files
 			return $.Token.success
 
@@ -582,17 +587,28 @@ async function installScenario ( index, sel ) {
 		iframe.src = sel
 		document.body.append( iframe )
 
-		let data = await player.on( 'install-list', true )
-		if ( ! data || ! data.list ) return $.Token.failure
+		let data = await Promise.race( [
+			$.timeout( 10000 ), player.on( 'install-list', true )
+		] )
+		if ( ! data || ! data.list ) {
+			Action.sysMessage(
+				'サイトから応答がありませんでした\n'+
+				' \n'+
+				'（サイト上の連携スクリプトが古い可能性があります）'
+			)
+			return await Action.sysChoices( [ ], { backLabel: '戻る' } )
+		}
 
 		Action.sysMessage( 'インストールする作品を選んでください' )
 
 		let titleList = data.list.filter( o => !! o.title )
 		let noImage = await $.getImage( await $.fetchFile( './画像/画像なし.svg' ) )
 
+		let cacheMap = new Map
+
 		sel = await Action.sysPageChoices( async function * ( index ) {
 
-			let title = titleList[ index ].title
+			let title = ( titleList[ index ] || { } ).title
 
 			yield {
 				label: title ? title : '------',
@@ -603,19 +619,27 @@ async function installScenario ( index, sel ) {
 
 			if ( ! title ) return
 			data.port.postMessage( { type: 'getFile', index, path: '背景/サムネイル', extensions: extensions[ 'image' ]  } )
-			let file
-			while ( true ) {
-				let data = await player.on( 'install-file' )
-				file = data.file
-				if ( data.index == index ) break
+
+			let image
+			if ( cacheMap.has( index ) ) image = cacheMap.get( index )
+			else {
+				let file = await new Promise ( ok => {
+					data.port.addEventListener( 'message', evt => {
+						if ( evt.data.index != index ) return
+						ok( evt.data.file )
+					} )
+					data.port.start( )
+				} )
+				image = file ? await $.getImage( file ) : noImage
+				cacheMap.set( index, image )
 			}
-			let image = file ? await $.getImage( file ) : noImage
+
 			yield {
-				label: titleList[ index ],
+				label: title,
 				value: index,
 				bgimage: image
 			}
-		} )
+		},  { maxPages: Math.ceil( titleList.length / 6 ) } )
 
 		//sel = await Action.sysChoices( titleList, { backLabel: '戻る' } )
 		if ( sel == $.Token.back ) return installByScenarioList( )
