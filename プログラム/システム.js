@@ -598,7 +598,7 @@ async function installScenario ( index, sel ) {
 				label: title ? title : '------',
 				value: index,
 				bgimage: true,
-				disable: ! title
+				disabled: ! title
 			}
 
 			if ( ! title ) return
