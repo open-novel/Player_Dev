@@ -591,12 +591,17 @@ async function installScenario ( index, sel ) {
 		let noImage = await $.getImage( await $.fetchFile( './画像/画像なし.svg' ) )
 
 		sel = await Action.sysPageChoices( async function * ( index ) {
+
+			let title = titleList[ index ]
+
 			yield {
-				label: titleList[ index ],
+				label: title ? title : '------',
 				value: index,
-				bgimage: true
+				bgimage: true,
+				disable: ! title
 			}
 
+			if ( ! title ) return
 			data.port.postMessage( { type: 'getFile', index, path: '背景/サムネイル', extensions: extensions[ 'image' ]  } )
 			let file
 			while ( true ) {
