@@ -154,7 +154,7 @@ async function playSystemOpening ( mode ) {
 
 		let sel = 'インストール'
 		if ( title ) {
-			Action.sysMessage( `作品名：『 ${ title || '--------' } 』\\n開始メニュー` )
+			Action.sysMessage( `作品名：『 ${ title || '------' } 』\\n開始メニュー` )
 			sel = await Action.sysChoices( menuList, { backLabel: '戻る' } )
 		}
 		$.log( sel )
