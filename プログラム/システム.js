@@ -592,8 +592,8 @@ async function installScenario ( index, sel ) {
 		] )
 		if ( ! data || ! data.list ) {
 			Action.sysMessage(
-				'サイトから応答がありませんでした\n'+
-				' \n'+
+				'サイトから応答がありませんでした\\n'+
+				' \\n'+
 				'（サイト上の連携スクリプトが古い可能性があります）'
 			)
 			return await Action.sysChoices( [ ], { backLabel: '戻る' } )
