@@ -931,19 +931,19 @@ export async function showChoices ( { layer, choices, inputBox = layer.menuBox, 
 
 }
 
-export async function sysPageChoices ( dataYielder, { maxPages = 5, menuType } ) {
+export async function sysPageChoices ( dataYielder, { maxPages = 5, rowLen = 4, menuType } ) {
 
 	let cho, page = 1
 
 	while ( true ) {
 
-		let list = await Promise.all( [ ...Array( 6 ).keys( ) ].map( async i => {
-			let index = i + ( page - 1 ) * 6 + 1
+		let list = await Promise.all( [ ...Array( rowLen * 3 ).keys( ) ].map( async i => {
+			let index = i + ( page - 1 ) * 6
 			return ( ) => dataYielder( index )
 		} ) )
 
 		cho = await sysChoices( list, {
-			rowLen: 2, menuType,
+			rowLen, menuType,
 			backLabel: ( page > 1 ? `ページ${ page - 1 }` : '戻る' ),
 			currentLabel: `ページ${ page }`,
 			nextLabel: ( page < maxPages ? `ページ${ page + 1 }` : '' ),
