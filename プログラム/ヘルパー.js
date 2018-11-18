@@ -196,7 +196,6 @@ export function parseSetting ( text ) {
 	return setting
 }
 
-
 export class Awaiter {
 
 	fire ( key, value ) {

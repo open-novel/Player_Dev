@@ -931,6 +931,33 @@ export async function showChoices ( { layer, choices, inputBox = layer.menuBox, 
 
 }
 
+export async function sysPageChoices ( dataYielder ) {
+
+	let cho, page = 1
+
+	while ( true ) {
+
+		let list = await Promise.all( [ ...Array( 6 ).keys( ) ].map( async i => {
+			let index = i + ( page - 1 ) * 6 + 1
+			return ( ) => dataYielder( index )
+		} ) )
+
+		cho = await sysChoices( list, {
+			rowLen: 2, menuType: 'open',
+			backLabel: ( page > 1 ? `ページ${ page - 1 }` : '' ),
+			currentLabel: `ページ${ page }`,
+			nextLabel: ( page < 5 ? `ページ${ page + 1 }` : '' ),
+		} )
+
+		if ( cho == $.Token.back ) page --
+		else if ( cho == $.Token.next ) page ++
+		else break
+	}
+
+	return cho
+}
+
+
 export async function presentVR ( flag ) {
 	let VR = $.Settings.VR
 	if ( flag ) {
