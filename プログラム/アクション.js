@@ -239,7 +239,7 @@ async function showMenu ( layer ) {
 	WHILE: while ( true ) {
 
 		let type = await sysChoices(
-			[ 'セーブ', 'ロード', '会話ログ', 'シェアする', '会話欄非表示', '終了する' ],
+			[ 'セーブ', 'ロード', '会話ログ', 'シェア', 'オート', 'スキップ', '会話欄非表示', '終了する' ],
 			{ rowLen: 4, backLabel: '戻る', color: 'green' }
 		)
 
@@ -279,7 +279,7 @@ async function showMenu ( layer ) {
 				break WHILE
 
 			} break
-			case 'シェアする': {
+			case 'シェア': {
 
 				let capture = false, hiquality = false
 				WHILE2: while ( true ) {
@@ -317,6 +317,38 @@ async function showMenu ( layer ) {
 					}
 					break WHILE2
 				}
+
+			} break
+			case 'オート': {
+
+				( async ( ) => {
+
+					let skipping = true
+					layer.on( 'menu' ).then( ( ) => { skipping = false } )
+					while ( skipping ) {
+						layer.fire( 'next' )
+						await $.timeout( 1000 )
+					}
+
+				} )( )
+
+				break WHILE
+
+			} break
+			case 'スキップ': {
+
+				( async ( ) => {
+
+					let skipping = true
+					layer.on( 'menu' ).then( ( ) => { skipping = false } )
+					while ( skipping ) {
+						layer.fire( 'next' )
+						await $.timeout( 1 )
+					}
+
+				} )( )
+
+				break WHILE
 
 			} break
 			case '会話欄非表示': {
