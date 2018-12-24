@@ -247,6 +247,7 @@ async function showLog ( layer ) {
 
 		let cho = await sysChoices( [ ], {
 			color: 'green',
+			currentLabel: '会話ログ',
 			backLabel: pageHistory[ pageHistory.length - 1 ] == logLength - 1 ? '戻る' : '最新へ' ,
 			nextLabel: page == 0 ? undefined : '過去へ',
 		} )
