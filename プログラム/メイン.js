@@ -88,7 +88,7 @@ async function main( ) {
 	let captureEventTypes = [ 'down', 'up', 'move' ]
 
 	for ( let type of captureEventTypes ) {
-		canvas.addEventListener( `pointer${ type }`, e => {
+		canvas.addEventListener( `mouse${ type }`, e => {
 			e.preventDefault( ), e.stopPropagation( )
 			if ( e.button > 3 ) return
 			let button = [ 'left' ,'middle', 'right' ] [ e.button ]
