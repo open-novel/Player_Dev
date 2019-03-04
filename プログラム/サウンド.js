@@ -8,6 +8,7 @@ import * as DB from './データベース.js'
 
 
 let ctx, out, bgmSource, gain
+if ( ! window.AudioContext ) window.AudioContext = window.webkitAudioContext
 ctx = new AudioContext
 out = ctx.createGain( )
 setMainVolume( 0 )
