@@ -99,8 +99,9 @@ async function main( ) {
 		canvas.addEventListener( `touch${ type }`, e => {
 			e.preventDefault( ), e.stopImmediatePropagation( )
 			if ( type == 'start' ) type = 'down'
-			if ( type == 'end'   ) type = 'up'	
-			Player.onPointerEvent( { type, button: 'left', x: e.offsetX, y: e.offsetY } )
+			if ( type == 'end'   ) type = 'up'
+			let x = e.layerX || e.touches[ 0 ].clientX, y = e.layerY || e.touches[ 0 ].clientY  
+			Player.onPointerEvent( { type, button: 'left', x, y } )
 		}, true )
 	}
 
