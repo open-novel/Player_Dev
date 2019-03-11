@@ -104,24 +104,7 @@ async function playSystemOpening ( mode ) {
 	//		async ( ) => $.getImage( await $.fetchFile( './画像/画像なし.png' ) )
 	//	)
 
-	let cho = await Action.sysPageChoices( async function * ( index ) {
-		index += 1
-
-		let settings = titleList[ index ] || { }, { title, origin } = settings
-		yield {
-			label: title ? title : '--------',
-			value: { settings, index },
-			bgimage: false
-		}
-
-		/*let file = title ? await $.getFile( `${ origin }${ title }/背景/サムネイル` ).catch( e => null ) : null
-		let image = file ? await $.getImage( file ) : noImage
-		yield {
-			label: title ? title : '--------',
-			value: { settings, index },
-			bgimage: image
-		}*/
-	}, { maxPages: 5, rowLen: 2, menuType: 'open' } )
+	let cho = await Action.sysPageChoices( ['a','b'], { maxPages: 5, rowLen: 2, menuType: 'open' } )
 
 	if ( cho == $.Token.back ) {
 		location.reload( )
