@@ -103,8 +103,8 @@ export async function saveFiles ( data ) {
 	await on( ts ).catch( async ( ) => {
 		// fallback for iphone
 		data = await Promise.all( data.map( async ( [ file, path ] ) => {
-			file = await new Response( file ).arrayBuffer( )
-			return [ file, path ]
+			let ab = await new Response( file ).arrayBuffer( )
+			return [ { buffer: ab, type: file.type, name: file.name }, path ]
 		} ) )
 		let ts = DB.transaction( [ type ], 'readwrite' )
 		let os = ts.objectStore( type )
@@ -122,6 +122,9 @@ export async function loadFile ( path ) {
 	let os = DB.transaction( [ type ], 'readonly' ).objectStore( type )
 	let data = await on( os.get( path ) )
 	$.log( `Load${ type }`, path, data )
+	if ( data && data.buffer ) {
+		data = new File( [ data.buffer ], data.name, { type: data.type } )
+	} 
 	return data
 }
 
