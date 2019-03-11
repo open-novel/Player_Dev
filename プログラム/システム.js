@@ -99,10 +99,10 @@ async function playSystemOpening ( mode ) {
 
 	$.log( titleList )
 
-	let noImage = await $.getImage( await $.fetchFile( './画像/画像なし.svg' ) )
-		.catch(
-			async ( ) => $.getImage( await $.fetchFile( './画像/画像なし.png' ) )
-		)
+	//let noImage = await $.getImage( await $.fetchFile( './画像/画像なし.svg' ) )
+	//	.catch(
+	//		async ( ) => $.getImage( await $.fetchFile( './画像/画像なし.png' ) )
+	//	)
 
 	let cho = await Action.sysPageChoices( async function * ( index ) {
 		index += 1
