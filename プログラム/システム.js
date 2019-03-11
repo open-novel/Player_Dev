@@ -893,7 +893,7 @@ export let { target: initPlayer, register: nextInit } = new $.AwaitRegister( ini
 
 export function onPointerEvent ( { type, button, x, y } ) {
 
-	$.log( type, button, x, y )
+	//$.log( type, button, x, y )
 	player.fire( 'pointer' )
 	Action.onPoint( { type, button, x, y } )
 }

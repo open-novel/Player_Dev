@@ -84,7 +84,9 @@ export async function playBGM ( path ) {
 	let ab = await promise
 	let source = ctx.createBufferSource( )
 	source.loop = true
-	source.buffer = await ctx.decodeAudioData( ab )
+	source.buffer = await new Promise( ok =>
+		ctx.decodeAudioData( ab, ok )
+	)
 	source.connect( out )
 
 	stopBGM( )
