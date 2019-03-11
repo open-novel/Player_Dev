@@ -104,13 +104,13 @@ export function getImage ( blob ) {
 			url = URL.createObjectURL( blob )
 			blobCache.set( blob, url )
 		}
-		img.onload = ( ) => ok( img )
-		/*
+		//img.onload = ( ) => ok( img )
+		///*
 		img.onload = ( ) => {
 			if ( img.decode ) img.decode( ).finally( ( ) => ok( img ) )
 			else ok( img )
 		}
-		*/
+		//*/
 		img.onerror = ng
 		img.style.width = '0px'
 		img.style.height = '0px'
