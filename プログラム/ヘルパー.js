@@ -112,9 +112,10 @@ export function getImage ( blob ) {
 		}
 		*/
 		img.onerror = ng
-		img.style.width = '0px'
-		img.style.height = '0px'
+		//img.style.width = '0px'
+		//img.style.height = '0px'
 		img.src = url
+		if ( img.decode ) img.decode( )
 	} )
 }
 
