@@ -104,7 +104,7 @@ async function playSystemOpening ( mode ) {
 	//		async ( ) => $.getImage( await $.fetchFile( './画像/画像なし.png' ) )
 	//	)
 
-	let cho = await Action.sysPageChoices( ['a','b'], { maxPages: 5, rowLen: 2, menuType: 'open' } )
+	let cho = await Action.sysPageChoices( [{label:'a'},{label:'b'}], { maxPages: 5, rowLen: 2, menuType: 'open' } )
 
 	if ( cho == $.Token.back ) {
 		location.reload( )
