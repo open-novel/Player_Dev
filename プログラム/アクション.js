@@ -943,7 +943,7 @@ export async function showChoices ( { layer, choices, inputBox = layer.menuBox, 
 				textArea.prop( 'size', bgimage ? .35 : .7 )
 				textArea.prop( 'y', bgimage ? .55 : .05 )
 				//if ( Object( bgimage ) === bgimage ) image.show( )
-				alert( label )
+				//alert( label )
 			}
 		}
 
