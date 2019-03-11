@@ -100,7 +100,19 @@ export async function saveFiles ( data ) {
 	for ( let [ file, path ] of data ) {
 		os.put( file, path )
 	}
-	await on( ts )
+	await on( ts ).catch( async ( ) => {
+		// fallback for iphone
+		data = await Promise.all( data.map( async ( [ file, path ] ) => {
+			file = await new Response( file ).arrayBuffer( )
+			return [ file, path ]
+		} ) )
+		let ts = DB.transaction( [ type ], 'readwrite' )
+		let os = ts.objectStore( type )
+		for ( let [ file, path ] of data ) {
+			os.put( file, path )
+		}
+		return ts
+	} )
 }
 
 
