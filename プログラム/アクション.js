@@ -932,6 +932,7 @@ export async function showChoices ( { layer, choices, inputBox = layer.menuBox, 
 
 		//$.log( cho )
 		if ( typeof cho == 'function' ) observe( )
+			alert( typeof cho )
 
 		async function observe( ) {
 			for await ( let obj of cho( ) ) {
