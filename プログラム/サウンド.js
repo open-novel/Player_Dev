@@ -52,7 +52,9 @@ export async function playSysEffect ( name ) {
 			bufferCache.set( name, ab )
 		}
 		let source = ctx.createBufferSource( )
-		source.buffer = await ctx.decodeAudioData( ab.slice( 0 ) )
+		source.buffer = await new Promise( ok =>
+			ctx.decodeAudioData( ab.slice( 0 ), ok )
+		)
 		source.connect( out )
 		source.onended = ( ) => source.disconnect( )
 		ary.push( source )
