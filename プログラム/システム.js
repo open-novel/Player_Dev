@@ -111,16 +111,16 @@ async function playSystemOpening ( mode ) {
 		yield {
 			label: title ? title : '--------',
 			value: { settings, index },
-			bgimage: true
+			bgimage: false
 		}
 
-		let file = title ? await $.getFile( `${ origin }${ title }/背景/サムネイル` ).catch( e => null ) : null
+		/*let file = title ? await $.getFile( `${ origin }${ title }/背景/サムネイル` ).catch( e => null ) : null
 		let image = file ? await $.getImage( file ) : noImage
 		yield {
 			label: title ? title : '--------',
 			value: { settings, index },
 			bgimage: image
-		}
+		}*/
 	}, { maxPages: 5, rowLen: 2, menuType: 'open' } )
 
 	if ( cho == $.Token.back ) {
