@@ -104,7 +104,7 @@ export function getImage ( blob ) {
 			url = URL.createObjectURL( blob )
 			blobCache.set( blob, url )
 		}
-		img.onload = ok
+		img.onload = ( ) => ok( img )
 		/*
 		img.onload = ( ) => {
 			if ( img.decode ) img.decode( ).finally( ( ) => ok( img ) )
