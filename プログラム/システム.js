@@ -786,9 +786,9 @@ async function installScenario ( index, sel ) {
 			$.hint( '設定ファイル省略モードでインストールを続行します' )
 		}
 
-		[ '背景/サムネイル', 'その他/サムネイル', 'その他/投げ銭' ].forEach( path =>
+		let p = Promise.all( [ '背景/サムネイル', 'その他/サムネイル', 'その他/投げ銭' ].map( path =>
 			getFile( path, 'image' ).catch( ( ) => null )
-		)
+		) )
 
 		doneCount = fetchCount = 2
 		failure = false
@@ -804,6 +804,7 @@ async function installScenario ( index, sel ) {
 		}
 
 		await getScenario( startScenario )
+		await p
 
 		port.close( )
 
