@@ -53,6 +53,20 @@ export async function play ( settings, state, _others = others ) {
 		Array.from( document.querySelectorAll( 'img' ), elm => elm.remove( ) )
 	} while ( state = stateList.shift( ) )
 
+	sysMessage( '再生が終了しました' )
+	let cho = await sysChoices( [
+		'最初から再生する',
+		nagesenChk( '作者に投げ銭をする' ),
+	], { backLabel: '作品選択へ' } )
+	switch ( cho ) {
+		case '最初から再生する': {
+			return play( settings )
+		} break
+		case '作者に投げ銭をする': {
+			await nagesen( )
+		} break
+	}
+
 }
 
 
@@ -276,16 +290,21 @@ async function showLog ( layer ) {
 
 async function showMenu ( layer ) {
 
-	let title = settings.title
+	let { title, origin } = settings
 	if ( ! title ) return
 
 	//layer.on( 'menu' ).then( ( ) => closeMenu( layer ) )
 
 	WHILE: while ( true ) {
 
+
 		let type = await sysChoices(
-			[ 'セーブ', 'ロード', '会話ログ', 'シェア', 'オート', 'スキップ', '会話欄非表示', '終了する' ],
-			{ rowLen: 4, backLabel: '戻る', color: 'green' }
+			[ 'セーブ', 'ロード', '会話ログ',
+			'オート', 'スキップ', '会話非表示',
+			'シェア',
+			nagesenChk( '投げ銭' ),
+			'終了する' ],
+			{ rowLen: 3, backLabel: '戻る', color: 'green' }
 		)
 
 		let page = 1
@@ -396,7 +415,17 @@ async function showMenu ( layer ) {
 				break WHILE
 
 			} break
-			case '会話欄非表示': {
+			case '投げ銭': {
+
+				settings[ '投げ銭コメント' ]
+
+				let cho = await nagesen( )
+				if ( cho == $.Token.back ) break SWITCH
+				if ( cho == $.Token.close ) break WHILE
+
+
+			} break
+			case '会話非表示': {
 
 				let p = sysChoices( [ ], { } )
 				nowLayer.conversationBox.hide( )
@@ -427,7 +456,43 @@ async function showMenu ( layer ) {
 }
 
 
+export async function nagesen ( ) {
 
+	let { title, origin } = settings
+	let nofile, file = await $.getFile( `${ origin }${ title }/その他/投げ銭` ).catch( ( ) => null )
+	if ( ! file ) nofile = await $.fetchFile( './画像/画像なし.svg' )
+	let image = await $.getImage( file || nofile )
+
+	let label = ( settings[ '投げ銭コメント' ] || [ '' ] ).join( '\n' )
+
+	while ( true ) {
+
+		let cho = await sysChoices( [
+			{ label: '', bgimage: image },
+			{ label, textLine: 8 }
+		], {
+			backLabel: '戻る',
+			currentLabel: file ? '《投げ銭》' : '',
+			rowLen: 1
+		} )
+		if ( $.isToken( cho )  ) return cho
+		else $.download( image.src, '投げ銭用画像' )
+	}
+
+}
+
+function nagesenChk ( label ) {
+	return async function * ( ) {
+		let { title, origin } = settings
+		let disabled = true
+		yield { label, disabled }
+		disabled = ! (
+			settings[ '投げ銭コメント' ] ||
+			await $.getFile( `${ origin }${ title }/その他/投げ銭` ).catch( ( ) => null )
+		)
+		yield { label, value: label, disabled }
+	}
+}
 
 export function isOldLayer ( layer ) {
 	return layer != nowLayer
@@ -893,32 +958,33 @@ export async function showChoices ( { layer, choices, inputBox = layer.menuBox, 
 
 	for ( let i = 0; i < len; i++ ) {
 		let cho = choices[ i ]
-		let { label = '', value = label, disabled = false, bgimage = null } =
+		let { label = '', value = label, disabled = false, bgimage = null, textLine = 1 } =
 			( cho === Object( cho ) ) ? cho : { label: cho }
-		if ( ! label ) disabled = true
+		//if ( ! label ) disabled = true
 		let row = i % rowLen, col = i / rowLen | 0
 		let [ x, y ] = [ m / 2 + ( w + m / 2 ) * col, m + ( h + m ) * row ]
 
 		let choiceBox = new Renderer.RectangleNode( {
 			name: 'choiceBox',
-			x, y, w, h, listenerMode: 'listen',
+			x, y, w, h, listenerMode: textLine == 1 ? 'listen' : undefined,
 			disabled,
-			fill: bgimage ? 'rgba( 127, 127, 127, 1 )' : '',
-			sound: ! disabled
+			fill: bgimage ? 'rgba( 127, 127, 127, 1 )' : textLine != 1 ? 'rgba( 0, 0, 0, 0 )' : '',
+			sound: ! disabled,
 		} )
 		inputBox.append( choiceBox )
 
 		let image  = new Renderer.ImageNode( {
-			name: 'bgimage', img: bgimage, o: .75, clip: true,
-			listenerMode: 'listen', sound: ! disabled
+			name: 'bgimage', img: bgimage, o: .9, clip: true, fixed: true,
+			listenerMode: 'listen', sound: ( ! disabled ) && textLine == 1,
 		} )
 		choiceBox.append( image )
 
 		let textArea = new Renderer.TextNode( {
 			name: 'choiceText',
-			size: bgimage ? .35 : .7,
-			y: bgimage ? .55 : .05,
-			pos: 'center'
+			size: bgimage ? .35 : .7 / textLine,
+			pos: textLine == 1 ? 'center' : undefined,
+			y: bgimage ? .55 : textLine == 1 ? .05 : 0,
+
 		} )
 		choiceBox.append( textArea )
 

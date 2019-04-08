@@ -76,10 +76,10 @@ async function play ( { ctx, mode, installEvent: event, option: opt } ) {
 
 		await Action.initAction( settings )
 
-		if ( res == 'error' ) Action.sysMessage( '問題が発生しました' )
-		else Action.sysMessage( '再生が終了しました' )
-		await Action.sysChoices( [ ], { backLabel: '作品選択へ' } )
-
+		if ( res == 'error' ) {
+			Action.sysMessage( '問題が発生しました' )
+			await Action.sysChoices( [ ], { backLabel: '作品選択へ' } )
+		}
 	}
 }
 
@@ -114,7 +114,11 @@ async function playSystemOpening ( mode ) {
 			bgimage: false
 		}
 
-		let file = title ? await $.getFile( `${ origin }${ title }/背景/サムネイル` ).catch( e => null ) : null
+		let file = ! title ? null : (
+			await $.getFile( `${ origin }${ title }/その他/サムネイル` ).catch( e => null )  ||
+			await $.getFile( `${ origin }${ title }/背景/サムネイル` ).catch( e => null )
+		)
+
 		let image = file ? await $.getImage( file ) : noImage
 		yield {
 			label: title ? title : '--------',
@@ -675,7 +679,9 @@ async function installScenario ( index, sel ) {
 				}
 
 				if ( ! title ) return
-				data.port.postMessage( { type: 'getFile', index, path: '背景/サムネイル', extensions: extensions[ 'image' ]  } )
+				;[ '背景/サムネイル', 'その他/サムネイル', 'その他/投げ銭' ].forEach( path =>
+					data.port.postMessage( { type: 'getFile', index, path, extensions: extensions[ 'image' ]  } )
+				)
 
 				let image
 				if ( cacheMap.has( index ) ) image = cacheMap.get( index )

@@ -123,7 +123,7 @@ export function getImage ( blob ) {
 
 export function download ( blob, title ) {
 	let link = document.createElement( 'a' )
-	link.href = URL.createObjectURL( blob )
+	link.href = typeof blob == 'string' ? blob : URL.createObjectURL( blob )
 	link.download = 'ONP'
 	+ decodeURIComponent( `_【${ title }】_` )
 	+ ( new Date ).toISOString( ).replace( /\.\d+Z$|[^\d]|/g, '' )
