@@ -736,7 +736,7 @@ async function installScenario ( index, sel ) {
 
 		let cacheMap = new Map
 
-		let doneCount = 0, fetchCount = 0, failure = false
+		let doneCount = 0, fetchCount = 1, failure = false
 
 		function getFile( path, type, { optional = false } = { } ) {
 
