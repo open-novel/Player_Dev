@@ -738,7 +738,7 @@ async function installScenario ( index, sel ) {
 
 		let doneCount = 0, fetchCount = 0, failure = false
 
-		function getFile( path, type ) {
+		function getFile( path, type, { optional = false } = { } ) {
 
 			if ( cacheMap.has( path ) ) return null
 
@@ -771,7 +771,7 @@ async function installScenario ( index, sel ) {
 					ng( )
 				} )
 
-			} ).then( f => { ++doneCount; showCount( ); return f }, ( ) => { failure = true } ).finally( ( ) => { done = true } )
+			} ).then( f => { ++doneCount; showCount( ); return f }, ( ) => { if ( ! optional ) failure = true } ).finally( ( ) => { done = true } )
 
 		}
 
@@ -787,7 +787,7 @@ async function installScenario ( index, sel ) {
 		}
 
 		let p = Promise.all( [ '背景/サムネイル', 'その他/サムネイル', 'その他/投げ銭' ].map( path =>
-			getFile( path, 'image' ).catch( ( ) => null )
+			getFile( path, 'image', { optional: true } ).catch( ( ) => null )
 		) )
 
 		doneCount = fetchCount = 2
