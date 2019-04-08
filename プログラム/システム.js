@@ -736,9 +736,9 @@ async function installScenario ( index, sel ) {
 
 		let cacheMap = new Map
 
-		let doneCount = 0, fetchCount = 1, failure = false
+		let doneCount = 0, fetchCount = 0, failure = false
 
-		function getFile( path, type, { optional = false } = { } ) {
+		function getFile( path, type ) {
 
 			if ( cacheMap.has( path ) ) return null
 
@@ -771,7 +771,7 @@ async function installScenario ( index, sel ) {
 					ng( )
 				} )
 
-			} ).then( f => { ++doneCount; showCount( ); return f }, ( ) => { if ( ! optional ) failure = true } ).finally( ( ) => { done = true } )
+			} ).then( f => { ++doneCount; showCount( ); return f }, ( ) => { failure = true } ).finally( ( ) => { done = true } )
 
 		}
 
@@ -786,11 +786,11 @@ async function installScenario ( index, sel ) {
 			$.hint( '設定ファイル省略モードでインストールを続行します' )
 		}
 
-		let p = Promise.all( [ '背景/サムネイル', 'その他/サムネイル', 'その他/投げ銭' ].map( path =>
-			getFile( path, 'image', { optional: true } ).catch( ( ) => null )
+		await Promise.all( [ '背景/サムネイル', 'その他/サムネイル', 'その他/投げ銭' ].map( path =>
+			getFile( path, 'image' ).catch( ( ) => null )
 		) )
 
-		doneCount = fetchCount = 2
+		doneCount = fetchCount
 		failure = false
 
 		async function getScenario( path ) {
@@ -804,7 +804,6 @@ async function installScenario ( index, sel ) {
 		}
 
 		await getScenario( startScenario )
-		await p
 
 		port.close( )
 
