@@ -679,7 +679,7 @@ async function installScenario ( index, sel ) {
 				}
 
 				if ( ! title ) return
-				;[ '背景/サムネイル', 'その他/サムネイル', 'その他/投げ銭' ].forEach( path =>
+				;[ '背景/サムネイル', 'その他/サムネイル' ].forEach( path =>
 					data.port.postMessage( { type: 'getFile', index, path, extensions: extensions[ 'image' ]  } )
 				)
 
@@ -689,12 +689,13 @@ async function installScenario ( index, sel ) {
 					let file = await new Promise ( ok => {
 						data.port.addEventListener( 'message', evt => {
 							if ( evt.data.index != index ) return
+							cacheMap.set( index, image )
 							ok( evt.data.file )
 						} )
 						data.port.start( )
 					} )
 					image = file ? await $.getImage( file ) : noImage
-					cacheMap.set( index, image )
+
 				}
 
 				yield {
@@ -785,7 +786,9 @@ async function installScenario ( index, sel ) {
 			$.hint( '設定ファイル省略モードでインストールを続行します' )
 		}
 
-		await getFile( '背景/サムネイル', 'image' ).catch( ( ) => null )
+		[ '背景/サムネイル', 'その他/サムネイル', 'その他/投げ銭' ].forEach( path =>
+			getFile( path, 'image' ).catch( ( ) => null )
+		)
 
 		doneCount = fetchCount = 2
 		failure = false
