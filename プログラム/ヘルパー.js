@@ -121,21 +121,14 @@ export function getImage ( blob ) {
 }
 
 
+export const isiOS = !! navigator.userAgent.match( /iPhone|iPad/ )
+
+
 export async function download ( blob, title ) {
+
+	if ( isiOS ) return
 	let link = document.createElement( 'a' )
-	// link.href = typeof blob == 'string' ? blob : URL.createObjectURL( blob )
-
-	if ( typeof blob == 'string' ) {
-		blob = await ( await fetch( blob ) ).blob( )
-	}
-
-	let fr = new FileReader
-	link.href = await new Promise( ( ok, ng ) => {
-		fr.onload = ( ) => ok( fr.result )
-		fr.onerror = ng
-		fr.readAsDataURL( blob )
-	} )
-
+	link.href = typeof blob == 'string' ? blob : URL.createObjectURL( blob )
 	link.download = 'ONP'
 	+ decodeURIComponent( `_【${ title }】_` )
 	+ ( new Date ).toISOString( ).replace( /\.\d+Z$|[^\d]|/g, '' )
