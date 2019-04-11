@@ -125,6 +125,10 @@ export async function download ( blob, title ) {
 	let link = document.createElement( 'a' )
 	// link.href = typeof blob == 'string' ? blob : URL.createObjectURL( blob )
 
+	if ( typeof blob == 'string' ) {
+		blob = await ( await fetch( blob ) ).blob( )
+	}
+
 	let fr = new FileReader
 	link.href = await new Promise( ( ok, ng ) => {
 		fr.onload = ( ) => ok( fr.result )
