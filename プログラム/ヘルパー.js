@@ -121,9 +121,17 @@ export function getImage ( blob ) {
 }
 
 
-export function download ( blob, title ) {
+export async function download ( blob, title ) {
 	let link = document.createElement( 'a' )
-	link.href = typeof blob == 'string' ? blob : URL.createObjectURL( blob )
+	// link.href = typeof blob == 'string' ? blob : URL.createObjectURL( blob )
+
+	let fr = new FileReader
+	link.href = await new Promise( ( ok, ng ) => {
+		fr.onload = ( ) => ok( fr.result )
+		fr.onerror = ng
+		fr.readAsDataURL( blob )
+	} )
+
 	link.download = 'ONP'
 	+ decodeURIComponent( `_【${ title }】_` )
 	+ ( new Date ).toISOString( ).replace( /\.\d+Z$|[^\d]|/g, '' )
