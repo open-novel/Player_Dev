@@ -39,7 +39,10 @@ async function main( ) {
 	player.appendChild( canvas )
 
 	if ( true || option.pwa ) {
-
+		
+		Object.assign( document.documentElement.style, {
+			overflow: 'hidden',
+		} )
 		Object.assign( document.body.style, {
 			backgroundColor: 'black',
 			margin: '0',
@@ -100,7 +103,7 @@ async function main( ) {
 			e.preventDefault( ), e.stopImmediatePropagation( )
 			if ( type == 'start' ) type = 'down'
 			if ( type == 'end'   ) type = 'up'
-			let x = e.layerX || e.touches[ 0 ].clientX, y = e.layerY || e.touches[ 0 ].clientY  
+			let x = e.layerX || e.touches[ 0 ].clientX, y = e.layerY || e.touches[ 0 ].clientY
 			Player.onPointerEvent( { type, button: 'left', x, y } )
 		}, true )
 	}

@@ -108,11 +108,13 @@ async function playSystemOpening ( mode ) {
 		index += 1
 
 		let settings = titleList[ index ] || { }, { title, origin } = settings
+		/*
 		yield {
 			label: title ? title : '--------',
 			value: { settings, index },
 			bgimage: false
 		}
+		*/
 
 		let file = ! title ? null : (
 			await $.getFile( `${ origin }${ title }/その他/サムネイル` ).catch( e => null )  ||
@@ -323,7 +325,7 @@ async function showSysMenu ( ) {
 					Action.sysMessage(
 						'ブラウザに認められなかったため登録できませんでした\\n' +
 						'（既に登録済みの可能性もあります）' )
-					await Action.sysChoices( [ ], { backLabel: '戻る' } )
+					await Action.sysChoices( [ ], { backLabel: '戻る', color: 'green' } )
 				}
 			} break
 			case 'データ保存状況確認': WHILE2: while ( true ) {
@@ -707,6 +709,7 @@ async function installScenario ( index, sel ) {
 
 			//sel = await Action.sysChoices( titleList, { backLabel: '戻る' } )
 			if ( sel == $.Token.back ) continue WHILE
+			if ( $.isToken( sel ) ) return sel
 			data.port.postMessage( { type: 'select', index: sel } )
 			break
 

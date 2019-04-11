@@ -127,11 +127,14 @@ export function download ( blob, title ) {
 	link.download = 'ONP'
 	+ decodeURIComponent( `_【${ title }】_` )
 	+ ( new Date ).toISOString( ).replace( /\.\d+Z$|[^\d]|/g, '' )
+	link.target = '_blank'
 	document.body.append( link )
 	link.click( )
 	link.remove( )
 	URL.revokeObjectURL( link.href )
 }
+
+
 
 
 export function AwaitRegister ( fn ) {
