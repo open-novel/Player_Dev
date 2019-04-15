@@ -301,7 +301,7 @@ export async function play ( layer, state, others ) {
 				} break
 				case 'スクリプト': {
 
-					switch ( textEval( prop ) ) {
+					switch ( textEval( prop[ 0 ] ) ) {
 
 						case '終わる': case　'おわる': {
 
@@ -320,7 +320,7 @@ export async function play ( layer, state, others ) {
 				} break
 				case 'マーク': {
 
-					let mark = textEval( prop )
+					let mark = textEval( prop[ 0 ] )
 					$.log( 'マーク', mark )
 					state.mark = mark
 
@@ -328,7 +328,7 @@ export async function play ( layer, state, others ) {
 
 				} break
 				default : {
-					$.warn( `"${ type }" このアクションの「実行」は未実装です` )
+					$.warn( `"${ type }" このアクションは未実装です` )
 				}
 
 			}
@@ -464,6 +464,7 @@ export function parse ( text, fileName ) {
 						case 'パラメータ': type = '変数'
 				break; case '立ち絵': type = '立絵'
 				break; case 'ＢＧＭ': type = 'BGM'
+				break; case 'ＳＥ': type = 'SE'
 				break; case '選択肢': type = '選択'
 				break; case '繰り返し': case '繰返し': type = '繰返'
 				break; case 'エフェクト': type = '効果'
@@ -473,9 +474,6 @@ export function parse ( text, fileName ) {
 
 				case 'コメント': /* 何もしない */
 				break
-				case '立絵': case '背景': case '変数': case '入力': case '効果':
-					subParse( { type, children, meta } )
-				break
 				case '会話':
 					subParse( { type, children, meta, separate: true } )
 				break
@@ -484,6 +482,7 @@ export function parse ( text, fileName ) {
 					subParse( { type, children, meta, subjump: true } )
 				break
 				default :
+					subParse( { type, children, meta } )
 					addAct( type, children[ 0 ].trim( ), { meta } )
 
 			}
@@ -615,11 +614,6 @@ export function parse ( text, fileName ) {
 					prop = prop.map( parseText )
 
 				} break
-				case '立絵': case '背景': case '選択': case '効果': {
-
-					prop = prop.map( p => p.map( parseText ) )
-
-				} break
 				case '分岐': case '繰返': {
 
 					prop = prop.map( p => [ subParseText( p[ 0 ] ), parseText( p[ 1 ] ) ] )
@@ -637,16 +631,10 @@ export function parse ( text, fileName ) {
 
 					prop = prop.split( /[#＃]/ ).map( parseText )
 
-
-				} break
-				case 'マーク': case 'BGM': case 'スクリプト': {
-
-					prop = parseText( prop )
-
 				} break
 				default : {
 
-					$.warn( `"${ type }" このアクションの「パース」は未実装です` )
+					prop = prop.map( p => p.map( parseText ) )
 
 				}
 
@@ -699,8 +687,14 @@ export function getFileList ( text ) {
 			} break
 			case 'BGM': {
 
-				let name = textEval( prop )
+				let name = textEval( prop[ 0 ] )
 				if ( name ) fileList.push( { type: 'audio', path: 'BGM/' + name } )
+
+			} break
+			case 'SE': {
+
+				let name = textEval( prop[ 0 ] )
+				if ( name ) fileList.push( { type: 'audio', path: 'SE/' + name } )
 
 			} break
 			case '選択': {

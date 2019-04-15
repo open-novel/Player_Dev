@@ -943,9 +943,11 @@ export async function scenarioChoices ( layer, choices ) {
 	return showChoices( { layer, choices, inputBox: layer.inputBox, menuType: 'open', menuEnebled: false } )
 }
 
-export async function showChoices ( { layer, choices, inputBox = layer.menuBox, rowLen = 4,
-	backLabel = '', currentLabel = '', nextLabel = '', menuType = 'close', menuEnebled = true,
-	color = 'blue' } ) {
+export async function showChoices ( {
+		layer, choices, inputBox = layer.menuBox, rowLen = 4,
+		backLabel = '', currentLabel = '', nextLabel = '',
+		menuType = 'close', menuEnebled = true, color = 'blue'
+	} ) {
 
 	let m = .05
 

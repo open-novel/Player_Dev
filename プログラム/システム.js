@@ -523,9 +523,9 @@ async function installScenario ( index, sel ) {
 
 
 	if ( ! sel ) {
-		Action.sysMessage( 'インストール方法を選んで下さい', 100 )
+		Action.sysMessage( '作品のインストール方法を選んで下さい', 100 )
 
-		let menuList = [ '作品リストから', 'フォルダから', 'Zipファイルから' ].map( label => ( { label } ) )
+		let menuList = [ '作品リストから', 'フォルダから', 'Zipファイルから', 'GitHubから' ].map( label => ( { label } ) )
 
 		sel = await Action.sysChoices( menuList, { backLabel: '戻る' } )
 	}
@@ -548,6 +548,15 @@ async function installScenario ( index, sel ) {
 			//window.open( 'https://github.com/open-novel/open-novel.github.io/wiki/作品リンク集' )
 
 			let res = await installByScenarioList( )
+			if ( res == $.Token.back ) return installScenario( index )
+			if ( res == $.Token.close ) return $.Token.close
+			if ( $.isToken( res ) ) return res
+			return $.Token.success
+
+		} break
+		case 'GitHubから': {
+
+			let res = await installByGitHub( )
 			if ( res == $.Token.back ) return installScenario( index )
 			if ( res == $.Token.close ) return $.Token.close
 			if ( $.isToken( res ) ) return res
@@ -606,6 +615,19 @@ async function installScenario ( index, sel ) {
 	$.log( files )
 	if ( ! files ) return $.Token.failure
 	if ( $.isToken( files ) ) return files
+
+
+
+	async function installByGitHub ( ) {
+
+		await Action.sysMessage(
+			'作品の場所を入力してください\n' +
+			'例　「user」「user/repository」「https://github.com/user/repository」'
+		)
+		throw 'noImp'
+	}
+
+
 
 	async function installByScenarioList ( ) {
 
