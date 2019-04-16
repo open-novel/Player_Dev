@@ -6,7 +6,7 @@ http://creativecommons.org/publicdomain/zero/1.0
 import * as $ from './ヘルパー.js'
 import * as Scenario from './シナリオ.js'
 import * as Renderer from './レンダラー.js'
-import * as Sound from './サウンド.js'
+import * as Media from './メディア.js'
 import * as DB from './データベース.js'
 
 
@@ -27,7 +27,7 @@ export async function init ( _settings = settings ) {
 	layer.on( 'menu' ).then( ( ) => showMenu( layer ) )
 	layer.on( 'back' ).then( ( ) => showLog( layer ) )
 	messageLog = [ ], imageAnimes = [ ]
-	await Sound.initSound( settings )
+	await Media.initMedia( settings )
 
 }
 
@@ -1125,5 +1125,5 @@ export async function presentVR ( flag ) {
 	}
 }
 
-export { playBGM, stopBGM, setMainVolume } from './サウンド.js'
+export { playBGM, stopBGM, setMainVolume } from './メディア.js'
 export { getFileList, getMarkList } from './シナリオ.js'

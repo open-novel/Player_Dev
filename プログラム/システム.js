@@ -12,8 +12,9 @@ const Archive = $.importWorker( `アーカイブ` )
 
 const extensions = {
 	text: [ 'txt' ],
-	image: [ 'webp', 'png', 'jpg', 'svg', 'gif' ],
-	audio: [ 'webm', 'mp3', 'wav', 'ogg', 'flac' ],
+	image: [ 'png', 'webp', 'jpg', 'svg', 'gif' ],
+	audio: [ 'mp3', 'webm', 'wav', 'flac' ],
+	video: [ 'mp4', 'webm', 'wav' ],
 }
 
 async function init ( { ctx, mode, installEvent, option } ) {
@@ -167,14 +168,17 @@ async function playSystemOpening ( mode ) {
 	}
 	// シナリオ開始メニュー表示
 
-	let menuList = [ '初めから', '続きから', '途中から', 'インストール' ].map( label => ( { label } ) )
+	let menuList = [
+		'初めから', '続きから', '途中から',
+		'インストール', '更新する', '投げ銭'
+	]
 
 	WHILE: while ( true ) {
 
 		let sel = 'インストール'
 		if ( title ) {
 			Action.sysMessage( `作品名：『 ${ title || '------' } 』\\n開始メニュー` )
-			sel = await Action.sysChoices( menuList, { backLabel: '戻る' } )
+			sel = await Action.sysChoices( menuList, { backLabel: '戻る', rowLen: 3 } )
 		}
 		$.log( sel )
 
