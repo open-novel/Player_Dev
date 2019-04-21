@@ -53,6 +53,8 @@ export async function play ( settings, state, _others = others ) {
 		Array.from( document.querySelectorAll( 'img' ), elm => elm.remove( ) )
 	} while ( state = stateList.shift( ) )
 
+	await init( settings )
+
 	sysMessage( '再生が終了しました' )
 	let cho = await sysChoices( [
 		'最初から再生する',
