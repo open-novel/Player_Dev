@@ -738,7 +738,7 @@ async function installScenario ( index, sel ) {
 					' \\n'+
 					'（サイト上の連携スクリプトが古い可能性があります）'
 				)
-				let sel = await Action.sysChoices( [ 'webサイトを開く' ], { backLabel: '戻る' } )
+				let sel = await Action.sysChoices( [ 'Webサイトを開く' ], { backLabel: '戻る' } )
 				if ( sel == $.Token.close ) return sel
 				if ( sel == 'Webサイトを開く' ) window.open( siteURL )
 				continue WHILE
