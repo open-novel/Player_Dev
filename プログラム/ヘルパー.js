@@ -56,6 +56,10 @@ export async function fetchFile ( name, type = 'blob' ) {
 }
 
 
+export async function fetchJSON ( name ) {
+	return fetchFile( name, 'json' ).catch( ( ) => null )
+}
+
 
 export function Deferred ( ) {
 	let resolve, reject

@@ -1079,14 +1079,14 @@ export async function showChoices ( {
 
 }
 
-export async function sysPageChoices ( dataYielder, { maxPages = 5, rowLen = 4, menuType } ) {
+export async function sysPageChoices ( dataYielder, { maxPages = 5, rowLen = 4, colLen = 3, menuType } ) {
 
 	let cho, page = 1
 
 	while ( true ) {
 
-		let list = await Promise.all( [ ...Array( rowLen * 3 ).keys( ) ].map( async i => {
-			let index = i + ( page - 1 ) * 6
+		let list = await Promise.all( [ ...Array( rowLen * colLen ).keys( ) ].map( async i => {
+			let index = i + ( page - 1 ) * rowLen * colLen
 			return ( ) => dataYielder( index )
 		} ) )
 

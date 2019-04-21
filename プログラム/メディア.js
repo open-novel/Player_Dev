@@ -21,7 +21,7 @@ async function init ( ) {
 
 }
 
-export let { target: initSound, register: nextInit } = new $.AwaitRegister( init )
+export let { target: initMedia, register: nextInit } = new $.AwaitRegister( init )
 
 
 export function setMainVolume ( value ) {

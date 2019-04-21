@@ -4,7 +4,7 @@ http://creativecommons.org/publicdomain/zero/1.0
 */
 
 import * as $ from './ヘルパー.js'
-import * as Sound from './サウンド.js'
+import * as Media from './メディア.js'
 
 let ctx = null
 let DPCanvas = null
@@ -88,7 +88,7 @@ class Node {
 			setSound( { node: this, type: 'click', name: 'クリック.ogg' } )
 			async function setSound ( { node, type, name } ) {
 				await node.on( type )
-				Sound.playSysEffect( name )
+				Media.playSysEffect( name )
 				setSound ( { node, type, name } )
 			}
 		}

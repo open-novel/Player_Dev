@@ -13,7 +13,7 @@ const Archive = $.importWorker( `アーカイブ` )
 const extensions = {
 	text: [ 'txt' ],
 	image: [ 'png', 'webp', 'jpg', 'svg', 'gif' ],
-	audio: [ 'mp3', 'webm', 'wav', 'flac' ],
+	audio: [ 'mp3', 'webm', 'wav', 'ogg', 'm4a', 'flac' ],
 	video: [ 'mp4', 'webm', 'wav' ],
 }
 
@@ -170,7 +170,7 @@ async function playSystemOpening ( mode ) {
 
 	let menuList = [
 		'初めから', '続きから', '途中から',
-		'インストール', '更新する', '投げ銭'
+		'インストール', 'アップデート', '投げ銭'
 	]
 
 	WHILE: while ( true ) {
@@ -229,8 +229,9 @@ async function playSystemOpening ( mode ) {
 				return playSystemOpening( mode )
 
 			} break
-
-			default: throw 'UnEx'
+			default: {
+				await Action.sysMessage( 'この機能は未実装です' )
+			}
 		}
 
 	}
@@ -622,13 +623,63 @@ async function installScenario ( index, sel ) {
 
 
 
-	async function installByGitHub ( ) {
+	async function installByGitHub ( { user = '' } = { } ) {
 
-		await Action.sysMessage(
-			'作品の場所を入力してください\n' +
-			'例　「user」「user/repository」「https://github.com/user/repository」'
-		)
-		throw 'noImp'
+		await Action.sysMessage( '※この機能は未完成です※' )
+
+		let api = 'https://api.github.com'
+
+		if ( ! user ) {
+			await Action.sysMessage( 'ユーザー名を入力してください' )
+			user = ( window.prompt( 'ユーザー名を入力してください', '' ) || '' ).trim( )
+		}
+		if ( ! /^[-\w]+$/.test( user ) ) {
+			await Action.sysMessage( 'ユーザー名が不正です' )
+			return $.Token.failure
+		}
+		let repoList = await $.fetchJSON( `${ api }/users/${ user }/repos` )
+		if ( ! repoList ) {
+			await Action.sysMessage( 'ユーザーが存在しません' )
+			return $.Token.failure
+		}
+		if ( ! repoList.length ) {
+			await Action.sysMessage( 'リポジトリが存在しません' )
+			return $.Token.failure
+		}
+
+		Action.sysMessage( 'リポジトリを選んでください' )
+		let repo = await Action.sysPageChoices( async function * ( index ) {
+			let repo = repoList[ index ]
+			yield repo ? { label: repo.name, value: repo } : { disabled: true }
+		}, { maxPages: Math.ceil( repoList.length / 15 ), rowLen: 5, colLen: 3 } )
+
+		let folderList = await $.fetchJSON( `${ api }/repos/${ user }/${ repo.name }/contents` )
+
+		//TODO: zipに対応
+		folderList = (
+			await Promise.all( folderList.map( async data => {
+				if ( data.type != 'dir' ) return null
+				let subs = await $.fetchJSON( `${ data.url }` )
+				if ( ! subs.find( data => data.type == 'dir' && data.name == 'シナリオ' ) )
+					return null
+				return data
+			} ) )
+		).filter( data => !! data )
+
+		if ( ! folderList.length ) {
+			await Action.sysMessage( 'リポジトリ内に作品が存在しません' )
+			return installByGitHub( { user } )
+		}
+		Action.sysMessage( 'インストールする作品を選んでください' )
+		let folder = await Action.sysPageChoices( async function * ( index ) {
+			let folder = folderList[ index ]
+			yield folder ? { label: folder.name, value: folder } : { disabled: true }
+		}, { maxPages: Math.ceil( folderList.length / 15 ), rowLen: 5, colLen: 3 } )
+
+		$.log( folder )
+
+		await Action.sysMessage( '※この機能は未完成です※' )
+		return $.Token.failure
 	}
 
 
@@ -639,6 +690,7 @@ async function installScenario ( index, sel ) {
 
 		Action.sysMessage( '提供サイトリストを取得中……' )
 
+		/*
 		p = player.on( 'install-sites' )
 		iframe = document.createElement( 'iframe' )
 		iframe.src = 'https://open-novel.github.io/list.html'
@@ -652,9 +704,15 @@ async function installScenario ( index, sel ) {
 		}
 
 		let linkList = data.sites.map( a => ( { label: a[ 0 ], value: a[ 1 ] } ) )
+		*/
 
-		// let linkList = [ { label: '旧作品集', value: 'https://open-novel.github.io/Products/' } ]
-		let port
+		let api = 'https://raw.githubusercontent.com/wiki/open-novel/open-novel.github.io/作品リンク集.md'
+		let text = await $.fetchFile( api, 'text' )
+		let linkList = text.match(/^\*\s*\[.+?\]\(.+?\)/mg)
+			.map( t => t.match( /\[(.+?)\]\((.+?)\)/ ) )
+			.map( a => ( { label: a[ 1 ], value: a[ 2 ] } ) )
+
+
 		WHILE: while ( true ) {
 
 			Action.sysMessage( '作品集を選んでください' )
@@ -666,7 +724,7 @@ async function installScenario ( index, sel ) {
 
 			Action.sysMessage( '作品リストを取得中……' )
 
-			iframe.remove( )
+			//iframe.remove( )
 			p = player.on( 'install-list' )
 			iframe = document.createElement( 'iframe' )
 			iframe.src = siteURL
@@ -693,7 +751,6 @@ async function installScenario ( index, sel ) {
 
 			let cacheMap = new Map
 
-			port = data.port
 
 			let sel = await Action.sysPageChoices( async function * ( index ) {
 
