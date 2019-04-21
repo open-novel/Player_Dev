@@ -651,7 +651,7 @@ async function installScenario ( index, sel ) {
 		let repo = await Action.sysPageChoices( async function * ( index ) {
 			let repo = repoList[ index ]
 			yield repo ? { label: repo.name, value: repo } : { disabled: true }
-		}, { maxPages: Math.ceil( repoList.length / 15 ), rowLen: 5, colLen: 3 } )
+		}, { maxPages: Math.ceil( repoList.length / 6 ), colLen: 2 } )
 
 		let folderList = await $.fetchJSON( `${ api }/repos/${ user }/${ repo.name }/contents` )
 
@@ -674,7 +674,7 @@ async function installScenario ( index, sel ) {
 		let folder = await Action.sysPageChoices( async function * ( index ) {
 			let folder = folderList[ index ]
 			yield folder ? { label: folder.name, value: folder } : { disabled: true }
-		}, { maxPages: Math.ceil( folderList.length / 15 ), rowLen: 5, colLen: 3 } )
+		}, { maxPages: Math.ceil( folderList.length / 9 ) } )
 
 		$.log( folder )
 

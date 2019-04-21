@@ -58,7 +58,7 @@ export async function play ( settings, state, _others = others ) {
 	sysMessage( '再生が終了しました' )
 	let cho = await sysChoices( [
 		'最初から再生する',
-		nagesenChk( '作者に投げ銭をする' ),
+		//nagesenChk( '作者に投げ銭をする' ),
 	], { backLabel: '作品選択へ' } )
 	switch ( cho ) {
 		case '最初から再生する': {
@@ -135,7 +135,7 @@ export class Trigger {
 
 export async function showSaveLoad ( { layer, title, isLoad = false, color } ) {
 	let page = 1
-	let visibleTileNo = 12, getTileNo = 24, totalPageNo = ( ( getTileNo / visibleTileNo ) | 0 ) + ( isLoad ? 1 : 0 )
+	let visibleTileNo = 9, getTileNo = 27, totalPageNo = ( ( getTileNo / visibleTileNo ) | 0 ) + ( isLoad ? 1 : 0 )
 	while ( page > 0 ) {
 
 		let start = ( page - 1 ) * visibleTileNo
@@ -148,7 +148,7 @@ export async function showSaveLoad ( { layer, title, isLoad = false, color } ) {
 		if ( isLoad && page == totalPageNo ) currentLabel = 'オート'
 		if ( isLoad && page == totalPageNo - 1 ) nextLabel = 'オート'
 
-		let index = await sysChoices( choices, { backLabel, currentLabel, nextLabel, color } )
+		let index = await sysChoices( choices, { backLabel, currentLabel, nextLabel, color, rowLen: 3 } )
 		if ( index === $.Token.back ) page --
 		else if ( index == $.Token.next ) page ++
 		else if ( index == $.Token.close ) return $.Token.close
@@ -306,7 +306,7 @@ async function showMenu ( layer ) {
 			'シェア',
 			nagesenChk( '投げ銭' ),
 			'終了する' ],
-			{ rowLen: 3, backLabel: '戻る', color: 'green' }
+			{ backLabel: '戻る', color: 'green' }
 		)
 
 		let page = 1
@@ -439,7 +439,7 @@ async function showMenu ( layer ) {
 			case '終了する': {
 
 				let choices = [ '本当に終了する' ].map( label => ( { label } ) )
-				let type = await sysChoices( choices, { rowLen: 4, backLabel: '戻る', color: 'green' } )
+				let type = await sysChoices( choices, { backLabel: '戻る', color: 'green' } )
 				if ( type == $.Token.back ) break SWITCH
 				if ( type == $.Token.close ) break WHILE
 				stateList.length = 0
@@ -946,7 +946,7 @@ export async function scenarioChoices ( layer, choices ) {
 }
 
 export async function showChoices ( {
-		layer, choices, inputBox = layer.menuBox, rowLen = 4,
+		layer, choices, inputBox = layer.menuBox, rowLen = 3,
 		backLabel = '', currentLabel = '', nextLabel = '',
 		menuType = 'close', menuEnebled = true, color = 'blue'
 	} ) {
@@ -1081,7 +1081,7 @@ export async function showChoices ( {
 
 }
 
-export async function sysPageChoices ( dataYielder, { maxPages = 5, rowLen = 4, colLen = 3, menuType } ) {
+export async function sysPageChoices ( dataYielder, { maxPages, rowLen = 3, colLen = 3, menuType } ) {
 
 	let cho, page = 1
 
