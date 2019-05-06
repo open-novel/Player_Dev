@@ -8,6 +8,7 @@ import * as DB from './データベース.js'
 
 
 let ctx, out, bgmSource, gain
+export let activeBGV = null
 if ( ! window.AudioContext ) window.AudioContext = window.webkitAudioContext
 ctx = new AudioContext
 out = ctx.createGain( )
@@ -18,6 +19,7 @@ async function init ( ) {
 
 	//if ( ctx ) ctx.close( )
 	stopBGM( )
+	stopBGV( )
 
 }
 
@@ -73,6 +75,15 @@ export async function playSysEffect ( name ) {
 
 
 export async function playBGM ( path ) {
+	stopBGM( )
+	bgmSource = await play( path, true )
+}
+
+export async function playSE ( path ) {
+	await play( path, false )
+}
+
+async function play ( path, loop ) {
 
 	// TODO cache
 	let blob = await DB.getFile( path )
@@ -83,15 +94,13 @@ export async function playBGM ( path ) {
 	fr.readAsArrayBuffer( blob )
 	let ab = await promise
 	let source = ctx.createBufferSource( )
-	source.loop = true
+	source.loop = loop
 	source.buffer = await new Promise( ok =>
 		ctx.decodeAudioData( ab, ok )
 	)
 	source.connect( out )
-
-	stopBGM( )
-	bgmSource = source
-	bgmSource.start( )
+	source.start( )
+	return source
 
 }
 
@@ -101,3 +110,31 @@ export function stopBGM ( ) {
 	if ( bgmSource ) bgmSource.disconnect( )
 
 }
+
+
+
+export async function playBGV ( path ) {
+
+	// TODO cache
+	let blob = await DB.getFile( path )
+	let url = URL.createObjectURL( blob )
+	let video = document.createElement( 'video' )
+	video.src = url
+	stopBGV( )
+	activeBGV = video
+	activeBGV.play( )
+	await new Promise( ok => {
+		activeBGV.addEventListener( 'ended', ok )
+	} )
+
+}
+
+
+export function stopBGV ( ) {
+
+	if ( activeBGV ) activeBGV.pause( )
+	activeBGV = null
+
+}
+
+

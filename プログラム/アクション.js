@@ -1127,5 +1127,10 @@ export async function presentVR ( flag ) {
 	}
 }
 
-export { playBGM, stopBGM, setMainVolume } from './メディア.js'
+
+export function playBGV ( ...args ) {
+	return trigger.stepOr( Media.playBGV( ...args ) )
+}
+
+export { playSE, playBGM, stopBGM, stopBGV, setMainVolume } from './メディア.js'
 export { getFileList, getMarkList } from './シナリオ.js'

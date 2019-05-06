@@ -425,7 +425,7 @@ async function showSysMenu ( ) {
 						)
 						let choiceList = [ { label: 'ONにする' }, { label: 'OFFにする' } ]
 						$.disableChoiceList( [ ( TesterMode ? 'ON' : 'OFF' ) + 'にする'  ], choiceList )
-						let sel = await Action.sysChoices( choiceList, { backLabel: '戻る' } )
+						let sel = await Action.sysChoices( choiceList, { backLabel: '戻る', color: 'green' } )
 						if ( sel == $.Token.back ) continue WHILE2
 						if ( sel == $.Token.close ) break WHILE
 						TesterMode = ! TesterMode
@@ -628,6 +628,23 @@ async function installScenario ( index, sel ) {
 		await Action.sysMessage( '※この機能は未完成です※' )
 
 		let api = 'https://api.github.com'
+
+		let rate = await $.fetchJSON( `${ api }/rate_limit` )
+		let { remaining, reset } = rate.resources.core
+		let resetmin = Math.ceil( ( reset - Date.now( ) / 1000 ) / 60 ) 
+
+		if ( remaining == 0 ) {
+			await Action.sysMessage(
+				'通信回数制限のため現在この機能は利用できません\n' +
+				`（リセット：約${ resetmin }分後）`
+			)
+			return $.Token.failure
+		}
+		console.log(
+			`残り${ remaining }回の通信でこの機能は制限されます　` +
+			`（リセット：約${ resetmin }分後）`
+		)
+
 
 		if ( ! user ) {
 			await Action.sysMessage( 'ユーザー名を入力してください' )

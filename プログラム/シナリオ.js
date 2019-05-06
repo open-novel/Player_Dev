@@ -310,15 +310,27 @@ export async function play ( layer, state, others ) {
 
 					let [ name ] = prop.map( textEval )
 
-					if ( ! name ) Action.stopSE( )
-					else {
+					if ( name ) {
 						let path = `${ basePath }/SE/${ name }`
 
 						await Action.playSE( path )
 					}
 
 				} break
+				case 'ビデオ': {
 
+					let [ name ] = prop.map( textEval )
+
+					if ( name ) {
+
+						let path = `${ basePath }/ビデオ/${ name }`
+
+						await Action.playBGV( path )
+					}
+
+					Action.stopBGV( )
+
+				} break
 				case '効果': {
 
 					let [ type, value ] = prop.map( textEval )
@@ -496,7 +508,9 @@ export function parse ( text, fileName ) {
 						case 'パラメータ': type = '変数'
 				break; case '立ち絵': type = '立絵'
 				break; case 'ＢＧＭ': type = 'BGM'
+				break; case '効果音': type = 'SE'
 				break; case 'ＳＥ': type = 'SE'
+				break; case '動画': type = 'ビデオ'
 				break; case '選択肢': type = '選択'
 				break; case '繰り返し': case '繰返し': type = '繰返'
 				break; case 'エフェクト': type = '効果'
@@ -709,7 +723,7 @@ export function getFileList ( text ) {
 				if ( name ) fileList.push( { type: 'image', path: '背景/' + name } )
 				
 			} break
-			case '動画': {
+			case 'ビデオ': {
 
 				let name = textEval( prop[ 1 ] ) || textEval( prop[ 0 ] )
 				if ( name ) fileList.push( { type: 'video', path: type + '/' + name } )

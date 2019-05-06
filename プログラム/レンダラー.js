@@ -503,6 +503,32 @@ export class ImageNode extends Node {
 
 
 
+export class VideoNode extends Node {
+
+	constructor ( opt ) {
+		const def = { vdo: null }
+		opt = Object.assign( def, opt )
+		super ( opt )
+		//$.log( { x:this.x, y:this.y, w:this.w, h:this.h } )
+	}
+
+	draw ( { ctx, x, y, w, h } ) {
+		let vdo = Media.activeBGV
+		if ( ! vdo ) return
+
+		if ( Object( vdo ) === vdo ) {
+			let dwh = w / h, nwh = vdo.naturalWidth / vdo.naturalHeight
+			if ( dwh > nwh ) { x += ( w - h * nwh ) / 2, w = h * nwh }
+			if ( dwh < nwh ) { y += ( h - w / nwh ) / 2, h = w / nwh }
+			ctx.drawImage( vdo, x, y, w, h )
+		}
+
+	}
+
+}
+
+
+
 function initLayer ( ) {
 
 	if ( layerRoot ) {
@@ -536,6 +562,9 @@ function initLayer ( ) {
 			{
 				type: ImageNode, name: 'backgroundColor',
 				fill: 'rgba( 0, 0, 0, 1 )'
+			},
+			{
+				type: VideoNode, name: 'backgroundVideo',
 			},
 			{
 				type: GroupNode, name: 'backgroundGroup',
@@ -678,13 +707,17 @@ function initLayer ( ) {
 
 
 
-export function drawCanvas ( must ) {
+export function drawCanvas ( mustDraw ) {
 
 	if ( ! ctx ) return
 
 	layerRoot.fire( 'update' )
 
-	if ( layerRoot.dirty || must ) {
+	if ( Media.activeBGV ) {
+		mustDraw = true
+	}
+
+	if ( layerRoot.dirty || mustDraw ) {
 
 		refreshCanvasSize( )
 
