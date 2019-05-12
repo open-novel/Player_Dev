@@ -9,6 +9,8 @@ import * as Renderer from './レンダラー.js'
 import * as Media from './メディア.js'
 import * as DB from './データベース.js'
 
+const FlipImg = $.importWorker( `APNG` )
+
 
 
 let nowLayer, settings, trigger, others, stateList = [ ], messageLog = [ ]

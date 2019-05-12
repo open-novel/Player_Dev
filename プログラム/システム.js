@@ -8,7 +8,7 @@ import * as Action from './アクション.js'
 import * as DB from './データベース.js'
 
 
-const Archive = $.importWorker( `アーカイブ` )
+const Archive = $.importWorker( `ZIP` )
 
 const extensions = {
 	text: [ 'txt' ],
