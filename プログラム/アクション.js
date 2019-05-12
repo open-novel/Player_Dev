@@ -783,14 +783,14 @@ async function setPNGAnime ( image, blob ) {
 
 	} )
 
-	let reader = new FileReader
-	reader.onload = ( ) => $.log( reader.result )
-	reader.readAsDataURL( file[ 0 ].data[ 0 ] )
+	//let reader = new FileReader
+	//reader.onload = ( ) => $.log( reader.result )
+	//reader.readAsDataURL( file[ 0 ].data[ 0 ] )
 
 	$.log( file )
 
 	
-	let loop = 0, frame = 0, dispose = '', prev = null
+	let loop = 0, frame = 0, dispose = '', prev = null, preferred = performance.now( )
 	async function animate ( ) {
 		
 		loop ++
@@ -801,10 +801,27 @@ async function setPNGAnime ( image, blob ) {
 
 		let chunk = file[ frame ]
 
-		let { blend, delay, x, y, width, height } = chunk 
+		let { width, height } = file
+
+		let { blend, delay, x, y } = chunk 
+
+
+		let now = performance.now( )
+
+		let lag = now - preferred
+
+		setTimeout( animate, delay * 1000 - lag )
+
+		preferred = now + delay * 1000 
+
+
+		let imgs = await Promise.all( 
+			chunk.data.map( blob => $.getImage( blob ) )
+		)
+		
 
 		if ( dispose == 'BACKGROUND' )
-			ctx.clearRect( x, y, width, height )
+			ctx.clearRect( 0, 0, width, height )
 		if ( dispose == 'PREVIOUS' )
 			ctx.putImageData( prev, 0, 0 )
 
@@ -815,24 +832,26 @@ async function setPNGAnime ( image, blob ) {
 			prev = ctx.getImageData( 0, 0, file.width, file.height )
 
 
-		for ( let blob of chunk.data ) {
+		for ( let img of imgs ) {
 			if ( blend == 'SOURCE' ) {
-				ctx.clearRect( x, y, width, height )
+				ctx.clearRect( 0, 0, width, height )
 				blend = 'OVER'
+
 			}
 
 			//window.open( URL.createObjectURL( blob ) )
-			ctx.drawImage( await $.getImage( blob ), x, y )
+			ctx.drawImage( img, x, y )
 			
 		}
 
 
 		if ( ++frame >= file.length ) frame = 0
 
-		setTimeout( animate, delay * 1000 )
 
 	}
 	animate( )
+
+	imageAnimes.push( ( ) => { } )
 
 
 }

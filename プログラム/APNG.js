@@ -112,11 +112,11 @@ function join( chunks ) {
 
 
 			let IDAT = [
-				Uint32BigAry( [ data.byteLength ] ),
 				new Uint8Array( [ 73, 68, 65, 84 ] ),
 				new Uint8Array( data ),
-				Uint32BigAry( [ 0 ] ),  // TODO?
 			]
+			IDAT = [ Uint32BigAry( [ data.byteLength ] ), ...IDAT, getCRC32( IDAT ) ]
+
 
 			let IEND = [
 				Uint32BigAry( [ 0 ] ),
