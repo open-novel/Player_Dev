@@ -868,9 +868,9 @@ async function installScenario ( index, sel ) {
 				} )
 				//$.log( '--->', path )
 				port.postMessage( { type: 'getFile', path, extensions: exts } )
-				$.timeout( 10000 ).then(  ( ) => {
+				$.timeout( 30000 ).then(  ( ) => {
 					if ( done ) return
-					$.hint(`【 ${ path } 】のダウンロードがタイムアウトしました\n制限時間：10秒`)
+					$.hint(`【 ${ path } 】のダウンロードがタイムアウトしました\n制限時間：30秒`)
 					ng( )
 				} )
 
