@@ -12,7 +12,7 @@ const $ = { log ( ) { } }
 
 self.addEventListener( 'message', async e => {
 
-	let fn = { splitFile }[ e.data.fn ]
+	let fn = { splitPNG }[ e.data.fn ]
 	if ( ! fn ) throw 'UnEx'
 
 	let [ res, trans ] = await fn( ...e.data.args )
@@ -38,12 +38,46 @@ self.addEventListener( 'message', async e => {
 */
 
 
-function splitFile( buf ) {
+async function splitPNG( buf ) {
 
 
-	return join( split( buf ) )
+	let res = join( split( buf ) )
+	let trans = res.flatMap( data => data.data )
 
 
+	console.log( split( res[ 0 ].data[ 0 ] ) )
+
+	return [ res, trans ]
+
+	/*
+	return new Promise ( ok => {
+
+		let reader = new FileReader
+		reader.onload = ( ) => {
+			res.base64 = reader.result
+			ok( [ res, trans ] )
+		}
+		reader.readAsDataURL( new Blob( [ res[ 0 ].data[ 0 ] ], { type: 'image/png' } ) )
+	} )
+	*/
+
+
+}
+
+
+
+
+ 
+let magic = 0xEDB88320
+const CRC32Table = new Uint32Array( 256 )
+for ( let i = 0; i < 256; i++ ) {
+	let v = i
+	for ( let j = 0; j < 8; j++ ) {
+		let b = v & 1
+		v >>>= 1
+		if ( b ) v ^= magic
+	}
+	CRC32Table[i] = v
 }
 
 
@@ -51,53 +85,72 @@ function splitFile( buf ) {
 function join( chunks ) {
 
 
-	let signature = new Uint8Array( [ 137, 80, 78, 71, 13, 10, 26, 10 ] )
-	
-	let no = 0
+	function getCRC32( ary ) {
 
-	return chunks.map( ch => {
+		let crc32 = 0xFFFFFFFF
+		for ( let a of ary) for ( let i = 0; i < a.length; i++ )
+			crc32 = CRC32Table[(crc32 ^ a[i]) & 0xff] ^ (crc32 >>> 8)
+
+		return Uint32BigAry( [ ~crc32 ] )
+
+	}
+
+
+	chunks.forEach( ch => {
 		
-		let { width, height } = ch
-
 		ch.data = ch.data.map( data => {
 
+			let signature = new Uint8Array( [ 137, 80, 78, 71, 13, 10, 26, 10 ] )
+
 			let IHDR = [
-				Uint32BigAry( [ 13 ] ),
 				new Uint8Array( [ 73, 72, 68, 82 ] ),
-				Uint32BigAry( [ width, height ] ),
-				chunks.etc,
-				Uint32BigAry( [ 1995879252 ] ),
+				Uint32BigAry( [ ch.width, ch.height ] ),
+				new Uint8Array( chunks.etc ),
 			]
+			IHDR = [ Uint32BigAry( [ 13 ] ), ...IHDR, getCRC32( IHDR ) ]
+
+
 
 			let IDAT = [
 				Uint32BigAry( [ data.byteLength ] ),
-				new Uint8Array( [73, 68, 65, 84] ),
-				data,
-				new Uint32Array( [ 0 ] ),  // TODO?
+				new Uint8Array( [ 73, 68, 65, 84 ] ),
+				new Uint8Array( data ),
+				Uint32BigAry( [ 0 ] ),  // TODO?
 			]
 
 			let IEND = [
-				new Uint32Array( [ 0 ] ),
-				new Uint8Array( [73, 69, 78, 68] ),
+				Uint32BigAry( [ 0 ] ),
+				new Uint8Array( [ 73, 69, 78, 68 ] ),
 				Uint32BigAry( [ 2923585666 ] ),
 			]
 
-			let file = new File( [ signature, ...IHDR, ...IDAT, ...IEND ],
-				`${ ++no }.png`, { type: 'image/png' } )
+			let fragments = [ signature, ...IHDR, ...IDAT, ...IEND ]
+			//console.log( fragments )
+			let len = fragments.reduce( ( n, a ) => n + a.byteLength, 0 )
 
-			//new Response( file ).arrayBuffer( ).then( ab => console.log( split( ab ) ) )
+			let buf = new Uint8Array( len )
+			let p = 0
+			for ( let ary of fragments ) {
+				buf.set( ary, p )
+				p += ary.byteLength
+			}
+			return buf.buffer
 
-			return file
 
 		} )
 		return ch
 	} )
 
+	//delete chunks.etc
+	//delete chunks.chunks
+
+	return chunks
+
 
 	function Uint32BigAry ( ary ) {
 		let view = new DataView( new ArrayBuffer( 4 * ary.length ) )
 		for ( let i = 0; i < ary.length; i++ ) view.setUint32( 4 * i, ary[ i ] )
-		return view.buffer
+		return new Uint8Array( view.buffer )
 	}
 
 
@@ -158,7 +211,9 @@ function split( buf ) {
 		let data	= readChunk( type, length )
 		let crc		= read32( )
 
+		//if ( isTest ) debugger
 
+		if ( type == 'IHDR' ) chunks.crc = crc
 		if ( type == 'IHDR' || type == 'acTL' )
 			Object.assign( chunks, data )
 		if ( type == 'fcTL' )
@@ -166,14 +221,13 @@ function split( buf ) {
 		if ( type == 'IDAT' || type == 'fdAT' ) {
 			if ( ! chunks[ chunks.length - 1 ] )
 				chunks[ chunks.length ]　= { }
-			if ( ! chunks[ chunks.length - 1 ].data )
+			if ( ! chunks[ chunks.length - 1 ].data ) 
 				chunks[ chunks.length - 1 ].data = [ ]
 			chunks[ chunks.length - 1 ].data.push( data.data )
 			
 		}
-
-		console.log( type, crc )
 		
+		//console.log( type, crc )
 	}
 
 
@@ -244,3 +298,5 @@ function split( buf ) {
 
 
 }
+
+

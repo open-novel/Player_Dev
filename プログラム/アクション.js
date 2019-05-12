@@ -755,7 +755,90 @@ export function removePortraits ( layer ) {
 
 
 
-async function setAnime ( image, xml ) {
+
+function animateImages ( time ) {
+
+	for ( let func of imageAnimes ) func( time )
+
+}
+
+
+async function setPNGAnime ( image, blob ) {
+
+	let file = await FlipImg.splitPNG( await new Response( blob ).arrayBuffer( ) )
+	
+	let plays = file.plays
+	if ( ! plays ) return
+
+	//let baseTime = performance.now( )
+
+	let canvas = document.createElement( 'canvas' )
+	canvas.width = file.width
+	canvas.height = file.height
+	let ctx = canvas.getContext( '2d' )
+	image.img = canvas
+
+	file.forEach( chunk => {
+		chunk.data = chunk.data.map( data => new Blob( [ data ], { type: 'image/png' } ) )
+
+	} )
+
+	let reader = new FileReader
+	reader.onload = ( ) => $.log( reader.result )
+	reader.readAsDataURL( file[ 0 ].data[ 0 ] )
+
+	$.log( file )
+
+	
+	let loop = 0, frame = 0, dispose = '', prev = null
+	async function animate ( ) {
+		
+		loop ++
+		if ( frame == 0 ) {
+			if( loop > plays ) return $.log( 'APNGループ終了' )
+			dispose = 'BACKGROUND' 
+		}
+
+		let chunk = file[ frame ]
+
+		let { blend, delay, x, y, width, height } = chunk 
+
+		if ( dispose == 'BACKGROUND' )
+			ctx.clearRect( x, y, width, height )
+		if ( dispose == 'PREVIOUS' )
+			ctx.putImageData( prev, 0, 0 )
+
+
+		dispose = chunk.dispose
+
+		if ( dispose == 'PREVIOUS' )
+			prev = ctx.getImageData( 0, 0, file.width, file.height )
+
+
+		for ( let blob of chunk.data ) {
+			if ( blend == 'SOURCE' ) {
+				ctx.clearRect( x, y, width, height )
+				blend = 'OVER'
+			}
+
+			//window.open( URL.createObjectURL( blob ) )
+			ctx.drawImage( await $.getImage( blob ), x, y )
+			
+		}
+
+
+		if ( ++frame >= file.length ) frame = 0
+
+		setTimeout( animate, delay * 1000 )
+
+	}
+	animate( )
+
+
+}
+
+
+async function setSVGAnime ( image, xml ) {
 	let animates = Array.from( xml.querySelectorAll(
 		'animate,  animateColor, animateMotion, animateTransform'
 	), element => {
@@ -768,39 +851,24 @@ async function setAnime ( image, xml ) {
 		if ( values.length == 0 ) return null
 		return { element, values, duration }
 	} ).filter( obj => !! obj )
-	imageAnimes.push( { xml, animates, image, baseTime: performance.now( ) } )
-}
 
-function animateImages ( time ) {
+	let baseTime = performance.now( )
 
-	for ( let { xml, animates, image, baseTime } of imageAnimes ) {
-
+	imageAnimes.push( time => {
 		let msec = time - baseTime
-
-		// Array.from( xml.querySelectorAll( 'animate' ), elm => {
-		// 	let begin = +( elm.getAttribute( 'begin' ) || '' ).match( /\d+|/ )[ 0 ] || 0
-		// 	let end = +( elm.getAttribute( 'end' ) || '' ).match( /\d+|/ )[ 0 ] || 0
-		// 	elm.setAttribute( 'begin', begin - sec + 's' )
-		// 	if ( end ) elm.setAttribute( 'end', end - sec + 's' )
-		// } )
-
 		for ( let { element, values, duration } of animates ) {
-
-
 			let index = ( ( msec / duration ) % 1 ) * values.length | 0
 			//$.log( duration, msec / duration, index, values )
 			element.setAttribute( 'values', values[ index ] )
 		}
-
+		// TODO cache
 		let text = new XMLSerializer( ).serializeToString( xml )
 		let blob = new Blob( [ text ], { type: 'image/svg+xml' } )
-		//$.log( blob )
 		$.getImage( blob ).then( img => image.prop( 'img', img ) )
 
-	}
-
-
+	} )
 }
+
 
 
 async function showImage ( targetGroup, path, pos, kind ) {
@@ -818,6 +886,7 @@ async function showImage ( targetGroup, path, pos, kind ) {
 	let img, xml
 
 	let blob = await $.getFile( path )
+	let isPNG = blob.type.includes( 'png' )
 	if ( blob.type.includes( 'svg+xml' ) ) {
 		xml =  new DOMParser( ).parseFromString( await ( new Response( blob ).text( ) ) ,'image/svg+xml' )
 	}
@@ -852,7 +921,10 @@ async function showImage ( targetGroup, path, pos, kind ) {
 		} break
 	}
 
-	if ( xml && image ) setAnime( image, xml )
+
+	if ( isPNG && image ) setPNGAnime( image, blob )
+	if ( xml && image ) setSVGAnime( image, xml )
+
 
 	$.log( { x, y, w, h, pos, oldPos, image } )
 

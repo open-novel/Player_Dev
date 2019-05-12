@@ -825,7 +825,7 @@ async function installScenario ( index, sel ) {
 
 	async function unpackFile ( zip ) {
 		if ( ! zip ) return $.Token.failure
-		let data = ( await Archive.unpackFile( zip ) ).data
+		let data = ( await Archive.unpackFile( zip ) )
 		if ( ! data ) return $.Token.failure
 		return data.map( f => new File( [ f.data ], f.name, { type: f.type } ) )
 	}
