@@ -793,9 +793,10 @@ async function setPNGAnime ( image, blob ) {
 	let loop = 0, frame = 0, dispose = '', prev = null, preferred = performance.now( )
 	async function animate ( ) {
 		
+		if ( ! image.parent ) return $.log( 'APNGアニメ中断' )
 		loop ++
 		if ( frame == 0 ) {
-			if( loop > plays ) return $.log( 'APNGループ終了' )
+			if( loop > plays ) return $.log( 'APNGアニメ完了' )
 			dispose = 'BACKGROUND' 
 		}
 
@@ -873,7 +874,8 @@ async function setSVGAnime ( image, xml ) {
 
 	let baseTime = performance.now( )
 
-	imageAnimes.push( time => {
+	let no = imageAnimes.push( time => {
+		if ( ! image.parent ) return imageAnimes.splice( no - 1, 1 )
 		let msec = time - baseTime
 		for ( let { element, values, duration } of animates ) {
 			let index = ( ( msec / duration ) % 1 ) * values.length | 0
