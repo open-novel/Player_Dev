@@ -282,7 +282,7 @@ async function showSysMenu ( ) {
 			break
 			case '操作方法リンク': window.open( 'https://github.com/open-novel/open-novel.github.io/wiki/' )
 			break
-			case '制作スレリンク': window.open( 'http://hayabusa.open2ch.net/test/read.cgi/news4vip/1537182605/l50' )
+			case '制作スレリンク': window.open( 'http://hayabusa.open2ch.net/test/read.cgi/news4vip/1537182605/l30' )
 			break
 
 			case '受信チャンネル設定': {
