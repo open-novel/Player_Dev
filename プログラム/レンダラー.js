@@ -239,7 +239,7 @@ export class RectangleNode extends Node {
 			}
 			if ( forcused ) {
 				ctx.lineWidth = H * .03
-				ctx.strokeStyle = 'rgba( 255, 255, 220, .5 )'
+				ctx.strokeStyle = 'rgba( 255, 255, 255, .5 )'
 
 				ctx.stroke( )
 			}
