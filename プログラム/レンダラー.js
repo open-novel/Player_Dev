@@ -228,7 +228,7 @@ export class RectangleNode extends Node {
 
 			this.drawPath( { x, y, w, h } )
 
-			ctx.filter = `blur(${ H * .0000 }px)`
+			ctx.filter = `blur(${ H * .0005 }px)`
 
 			if ( disabled ) fill = 'rgba( 200, 200, 200, .5 )'
 			if ( pushed ) {
@@ -283,7 +283,7 @@ export class PolygonNode extends Node {
 
 		if ( fill ) {
 
-			ctx.filter = `blur(${ H * .001 }px)`
+			ctx.filter = `blur(${ H * .0005 }px)`
 
 			if ( disabled ) fill = 'rgba( 200, 200, 200, .5 )'
 			if ( pushed ) {
