@@ -593,6 +593,7 @@ function decoText ( text ) {
 				break;	case 'C': color = undefined
 				break;	case 's': mag = val
 				break;	case 'S': mag = 1
+				break;	case '_': mag = 1
 				break;	default : $.warn( `"${ type }" このメタ文字は未実装です`　)
 			}
 		} else {
