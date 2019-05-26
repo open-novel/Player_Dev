@@ -653,7 +653,7 @@ async function installScenario ( index, sel ) {
 
 	async function installByURL ( { user = '' } = { } ) {
 
-		let _base = option.params.get( 'base' ) || 'https://raw.githubusercontent.com/open-novel/Products/master'
+		let _base = option.params.get( 'base' ) || 'https://raw.githubusercontent.com/open-novel/Products/master/サンプル'
 		let _title = option.params.get( 'title' )
 
 
