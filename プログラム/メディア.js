@@ -7,17 +7,19 @@ import * as $ from './ヘルパー.js'
 import * as DB from './データベース.js'
 
 
-let ctx, out, bgmSource, gain, mainVolume
+let ctx, out, bgmSource, gain, mainVolume = 0
 export let activeBGV = null
 if ( ! window.AudioContext ) window.AudioContext = window.webkitAudioContext
-ctx = new AudioContext
-out = ctx.createGain( )
-setMainVolume( 0 )
-out.connect( ctx.destination )
+init( )
 
 async function init ( ) {
 
-	//if ( ctx ) ctx.close( )
+	if ( ctx ) ctx.close( )
+	ctx = new AudioContext
+	out = ctx.createGain( )
+	setMainVolume( mainVolume )
+	out.connect( ctx.destination )
+
 	stopBGM( )
 	stopBGV( )
 
