@@ -928,7 +928,7 @@ async function installScenario ( index, sel ) {
 
 			++fetchCount; showCount( )
 
-			let exts = extensions[ type ].concat( extensions[ type ].map( e => e.toUpperCase( ) ) )
+			let exts = extensions[ type ]//.concat( extensions[ type ].map( e => e.toUpperCase( ) ) )
 
 			let done = false
 
