@@ -540,16 +540,20 @@ export async function showMessage ( layer, name, text, speed ) {
 
 		let time = new $.Time
 
+		let interrupt = false
+
 		if ( speed == Infinity ) messageArea.put( decoListPure )
 
 		else loop: while ( true ) {
 
-			let interrupt = await trigger.stepOrFrameupdate( )
-
-			let to = interrupt ? len : speed * time.get( ) / 1000 | 0
+			let to = interrupt ? len : ( speed * time.get( ) / 1000 | 0 )
 
 			for ( ; index < to && index < len; index ++ ) {
-				let deco = decoList[ index ], wait = deco.wait || 0
+				let deco = decoList[ index ], wait = deco.wait || 0, pace = deco.pace
+				if ( pace ) {
+					speed = pace
+					continue loop
+				}
 				if ( wait ) {
 					index ++
 					time.pause( )
@@ -561,6 +565,8 @@ export async function showMessage ( layer, name, text, speed ) {
 			}
 
 			if ( to >= len ) break
+
+			interrupt = await trigger.stepOrFrameupdate( )
 		}
 
 		await trigger.step( )
@@ -586,6 +592,7 @@ function decoText ( text ) {
 			let [ , type, val ] = magic
 			switch ( type ) {
 							case 'w': decoList.push( { wait: val || Infinity } )
+				break;	case 'p': decoList.push( { pace: val || Infinity } )
 				break;	case 'n': { decoList = [ ], decoLines.push( decoList ) }
 				break;	case 'b': bold = true
 				break;	case 'B': bold = false
