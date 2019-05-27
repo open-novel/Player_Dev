@@ -457,7 +457,7 @@ export function parse ( text, fileName ) {
 
 			}
 
-			let index = progList.push( act )
+			progList.push( act )
 			prev.next = act
 			prev = act
 		}

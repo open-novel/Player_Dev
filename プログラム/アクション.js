@@ -551,6 +551,7 @@ export async function showMessage ( layer, name, text, speed ) {
 			for ( ; index < to && index < len; index ++ ) {
 				let deco = decoList[ index ], wait = deco.wait || 0, pace = deco.pace
 				if ( pace ) {
+					index ++
 					speed = pace
 					continue loop
 				}
