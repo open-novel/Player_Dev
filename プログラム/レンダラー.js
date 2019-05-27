@@ -618,11 +618,11 @@ function initLayer ( ) {
 				children: [
 					{
 						type: DecoTextNode, name: 'nameArea',
-						x: .05, w: .1, y: .18, size: .175, fill: 'rgba( 255, 255, 220, 1 )',
+						x: .05, w: .1, y: .18, size: .175, fill: 'rgba( 255, 255, 240, 1 )',
 					},
 					{
 						type: DecoTextNode, name: 'messageArea',
-						x: .2, w: .75, y: .18, size: .175, fill: 'rgba( 255, 255, 220, 1 )'
+						x: .2, w: .75, y: .18, size: .175, fill: 'rgba( 255, 255, 240, 1 )'
 					},
 				]
 			},
