@@ -546,7 +546,7 @@ export async function showMessage ( layer, name, text, speed ) {
 
 		else loop: while ( true ) {
 
-			let to = interrupt ? len : ( speed * time.get( ) / 1000 | 0 )
+			let to = ( interrupt || speed == Infinity ) ? len : ( speed * time.get( ) / 1000 | 0 )
 
 			for ( ; index < to && index < len; index ++ ) {
 				let deco = decoList[ index ], wait = deco.wait || 0, pace = deco.pace
