@@ -197,7 +197,7 @@ async function playSystemOpening ( mode ) {
 
 	let menuList = [
 		'初めから', '続きから', '途中から',
-		'インストール', 'アップデート', '投げ銭'
+		'インストール', 'アップデート', '削除する'
 	]
 
 	WHILE: while ( true ) {
@@ -257,6 +257,20 @@ async function playSystemOpening ( mode ) {
 				return playSystemOpening( mode )
 
 			} break
+			case '削除する': {
+
+				Action.sysMessage( '本当に削除しますか？' )
+				let sel = await Action.sysChoices( [ ], { backLabel: '戻る', nextLabel: '削除' } )
+				if ( sel === $.Token.back ) break SWITCH
+				if ( sel === $.Token.close ) break WHILE
+
+				Action.sysMessage( '削除しています……' )
+				await DB.deleteTitle( index )
+				Action.sysMessage( '削除しました' )
+				await Action.sysChoices( [ ], { backLabel: '作品選択へ' } )
+				return playSystemOpening( mode )
+
+			}
 			default: {
 				await Action.sysMessage( 'この機能は未実装です' )
 			}
@@ -663,7 +677,7 @@ async function installScenario ( index, sel ) {
 
 			let rate = await $.fetchJSON( `${ api }/rate_limit` )
 			let { remaining, reset } = rate.resources.core
-			let resetmin = Math.ceil( ( reset - Date.now( ) / 1000 ) / 60 ) 
+			let resetmin = Math.ceil( ( reset - Date.now( ) / 1000 ) / 60 )
 
 			if ( remaining == 0 ) {
 				await Action.sysMessage(
@@ -681,7 +695,7 @@ async function installScenario ( index, sel ) {
 				await Action.sysMessage( 'ユーザー名を入力してください' )
 				user = ( window.prompt( 'ユーザー名を入力してください', '' ) || '' ).trim( )
 			}
-			
+
 			if ( ! /^[-\w]+$/.test( user ) ) {
 				await Action.sysMessage( 'ユーザー名が不正です' )
 				return $.Token.failure
@@ -775,7 +789,7 @@ async function installScenario ( index, sel ) {
 				return $.Token.failure
 			} )
 
-		
+
 	}
 
 
