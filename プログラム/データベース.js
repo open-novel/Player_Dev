@@ -126,6 +126,31 @@ export async function saveFiles ( data ) {
 	} )
 }
 
+export async function gcFiles ( ) {
+
+	let list = await getTitleList( )
+	list = list.map( obj => obj.origin + obj.title +'/' )
+	$.log( list )
+
+	let type = 'File'
+	let os = DB.transaction( [ type ], 'readwrite' ).objectStore( type )
+	let { promise, resolve } = new $.Deferred, count = 0
+	os.openCursor( ).onsuccess = ( { target: { result: cursor } } ) => {
+		if ( ! cursor ) return resolve( )
+		let key = cursor.key
+		if ( ! list.some( path => key.startsWith( path ) ) ) {
+			cursor.delete( )
+			++count
+			$.log( 'DELETE!!', key )
+		}
+		cursor.continue( )
+	}
+	await promise
+
+	return count
+
+}
+
 
 export async function loadFile ( path ) {
 

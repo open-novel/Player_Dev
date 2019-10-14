@@ -266,7 +266,10 @@ async function playSystemOpening ( mode ) {
 
 				Action.sysMessage( '削除しています……' )
 				await DB.deleteTitle( index )
-				Action.sysMessage( '削除しました' )
+				let count = await DB.gcFiles( )
+				Action.sysMessage( `${ count }個のファイルを削除しました` )
+
+
 				await Action.sysChoices( [ ], { backLabel: '作品選択へ' } )
 				return playSystemOpening( mode )
 
