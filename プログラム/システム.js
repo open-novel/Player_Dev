@@ -7,7 +7,6 @@ import * as $ from './ヘルパー.js'
 import * as Action from './アクション.js'
 import * as DB from './データベース.js'
 
-
 const Archive = $.importWorker( `ZIP` )
 
 const extensions = {
@@ -16,6 +15,9 @@ const extensions = {
 	audio: [ 'mp3', 'webm', 'wav', 'ogg', 'm4a', 'flac' ],
 	video: [ 'mp4', 'webm', 'wav' ],
 }
+
+// サーバーアクセステスト
+fetch( 'https://open-novel.work:3000' )
 
 async function init ( { ctx, mode, installEvent, option } ) {
 	await play( { ctx, mode, installEvent, option } )

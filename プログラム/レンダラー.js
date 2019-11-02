@@ -337,8 +337,9 @@ export class TextNode extends Node {
 	draw ( { x, y, w, h, c, disabled } ) {
 
 		let { fill, shadow, text, size, pos, rotate } = this
-		if ( ! fill && c ) fill = c
+		if ( typeof text != 'string' ) text = '######'
 
+		if ( ! fill && c ) fill = c
 		if ( disabled ) fill = 'rgba( 255, 255, 255, .5 )'
 
 		ctx.font = `${ h * size }px "Hiragino Kaku Gothic ProN", Meiryo`
