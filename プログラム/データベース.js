@@ -179,12 +179,31 @@ export async function getFile ( path ) {
 }
 
 
+export async function getAllFiles ( prefix ) {
+
+	let type = 'File',  list = [ ]
+	let os = DB.transaction( [ type ], 'readonly' ).objectStore( type )
+	let { promise, resolve } = new $.Deferred
+	os.openCursor( ).onsuccess = ( { target: { result: cursor } } ) => {
+		if ( ! cursor ) return resolve( )
+		let key = cursor.key
+		if ( key.startsWith( prefix ) ) {
+			list.push( cursor.value )
+		}
+		cursor.continue( )
+	}
+	await promise
+
+	return list
+
+}
+
 
 export async function getTitleList ( ) {
 
 	let type = 'TitleList'
 	let os = DB.transaction( [ type ], 'readonly' ).objectStore( type )
-	let { promise, resolve } = new $.Deferred, list = [ ]
+	let { promise, resolve } = new $.Deferred, list = { }
 	os.openCursor( ).onsuccess = ( { target: { result: cursor } } ) => {
 		if ( ! cursor ) return resolve( )
 		list[ cursor.key ] = cursor.value

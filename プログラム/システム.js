@@ -16,8 +16,7 @@ const extensions = {
 	video: [ 'mp4', 'webm', 'wav' ],
 }
 
-// サーバーアクセステスト
-fetch( 'https://open-novel.work:3000' )
+
 
 async function init ( { ctx, mode, installEvent, option } ) {
 	await play( { ctx, mode, installEvent, option } )
@@ -199,20 +198,22 @@ async function playSystemOpening ( mode ) {
 
 	let menuList = [
 		'初めから', '続きから', '途中から',
-		'作品の追加', '作品の更新', '作品の削除',
-		'作品の保存', '作品の投稿',
+		'削除する', '保存する', '投稿する',
+		'更新する', '上書する',
 	]
+	$.disableChoiceList( [ '上書する', '更新する', ], menuList )
+
+	console.log( menuList )
 
 	WHILE: while ( true ) {
 
-		let sel = '作品の追加'
+		let sel = '上書する'
 		if ( mode == 'direct' ) sel = '初めから'
 		else if ( title ) {
 			Action.sysMessage( `作品名：『 ${ title || '------' } 』\\n開始メニュー` )
 			//sel = await Action.sysChoices( menuList, { backLabel: '戻る', rowLen: 3 } )
 			sel = await Action.sysPageChoices( async function * ( index ) {
-				let sel = menuList[ index ]
-				yield sel ? { label: sel, value: sel } : { disabled: true }
+				yield ( menuList[ index ] || { disabled: true } )
 			}, { maxPages: 2, colLen: 2 } )
 		}
 		$.log( sel )
@@ -223,9 +224,9 @@ async function playSystemOpening ( mode ) {
 			case $.Token.close:
 				break WHILE
 
-			case '初めから':
+			case '初めから': {
 				return Action.play( settings, null, others )
-
+			} break
 			case '続きから': {
 
 				let state = await Action.showSaveLoad( { title, isLoad: true, settings, others } )
@@ -247,7 +248,7 @@ async function playSystemOpening ( mode ) {
 				return Action.play( settings, null, others )
 
 			} break
-			case '作品の追加': {
+			case '上書する': {
 
 				let success = await installScenario( index )
 				$.assert( $.isToken( success ) )
@@ -264,7 +265,7 @@ async function playSystemOpening ( mode ) {
 				return playSystemOpening( mode )
 
 			} break
-			case '作品の削除': {
+			case '削除する': {
 
 				Action.sysMessage( '本当に削除しますか？' )
 				let sel = await Action.sysChoices( [ ], { backLabel: '戻る', nextLabel: '削除' } )
@@ -280,7 +281,36 @@ async function playSystemOpening ( mode ) {
 				await Action.sysChoices( [ ], { backLabel: '作品選択へ' } )
 				return playSystemOpening( mode )
 
-			}
+			} break
+			case '保存する': {
+
+				Action.sysMessage( '作成中……' )
+
+				let prefix = settings.origin + title + '/'
+
+				let files = await DB.getAllFiles( prefix )
+				//let files = [ new File( [ ], 't1', { type: 'text/plain' } ) ]
+				let abs = await Promise.all( files.map( file => new Response( file ).arrayBuffer( ) ) )
+				let data = abs.map( ( ab, i ) => ( { buf: ab, name: files[ i ].name, type: files[ i ].type } ) )
+
+				let zip = await Archive.packFile( data, abs )
+				zip = new File( [ zip ], title + '.zip', { type: 'application/zip' } )
+
+				$.download( zip, zip.name )
+
+				Action.sysMessage( '作品をZIPファイルにしました' )
+				let sel = await Action.sysChoices( [ ], { backLabel: '戻る' } )
+				if ( sel === $.Token.back ) break SWITCH
+				if ( sel === $.Token.close ) break WHILE
+
+			} break
+			case '投稿する': {
+
+				await fetch( 'https://open-novel.work' )
+				Action.sysMessage( 'サーバーの準備ができていません\\nもうしばらくお待ち下さい' )
+				let sel = await Action.sysChoices( [ ], { backLabel: '戻る' } )
+
+			} break
 			default: {
 				await Action.sysMessage( 'この機能は未実装です' )
 			}
@@ -436,13 +466,19 @@ async function showSysMenu ( ) {
 					'クリックで各機能を設定できます'
 				)
 
-				let { VR, TesterMode } = $.Settings
+				let { VR, TesterMode, LocalSync } = $.Settings
+				let chooseFile = window.chooseFileSystemEntries
 
 				let sel = await Action.sysChoices( [
 
 					{
-						label: `テスターモード　（現在${ TesterMode ? 'ON ' : 'OFF' }）`,
+						label: `テスターモード　（${ TesterMode ? '現在ON ' : '現在OFF' }）`,
 						value: 'テスターモード'
+					},
+
+					{
+						label: `ローカル同期　（${ ! chooseFile ? '非対応' : LocalSync ? '現在ON ' : '現在OFF' }）`,
+						value: 'ローカル同期', disabled: ! chooseFile
 					},
 
 					async function * ( ) {
@@ -469,6 +505,7 @@ async function showSysMenu ( ) {
 				if ( sel == $.Token.close ) break WHILE
 
 				switch ( sel ) {
+
 					case 'テスターモード': {
 						Action.sysMessage(
 							'テスターモードが有効だと以下の効果があります\\n' +
@@ -489,8 +526,14 @@ async function showSysMenu ( ) {
 						await Action.sysChoices( [ ], { backLabel: 'リセットする', color: 'green' } )
 						location.reload( )
 						await $.neverDone
+
+					} break
+					case 'ローカル同期': {
+
+
 					} break
 					case 'VR': {
+
 						let res = await $.trying( Action.presentVR( VR.enabled = ! VR.enabled ) )
 						if ( res == $.Token.failure ) {
 							VR.failureNum = ( VR.failureNum || 0 ) + 1
@@ -498,8 +541,10 @@ async function showSysMenu ( ) {
 						} else {
 							VR.failure = false
 						}
+
 					} break
 					case '投げ銭': {
+
 						let methods = [{
 							supportedMethods: [ 'basic-card' ],
 							data: {
@@ -928,7 +973,7 @@ async function installScenario ( index, sel ) {
 
 	async function unpackFile ( zip ) {
 		if ( ! zip ) return $.Token.failure
-		let data = ( await Archive.unpackFile( zip ) )
+		let data = ( await Archive.unpackFile( zip, [ zip ] ) )
 		if ( ! data ) return $.Token.failure
 		return data.map( f => new File( [ f.data ], f.name, { type: f.type } ) )
 	}

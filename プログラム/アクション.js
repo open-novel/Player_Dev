@@ -1110,7 +1110,7 @@ export async function showChoices ( {
 		async function observe( ) {
 			for await ( let obj of cho( ) ) {
 				//$.log( 'obj', obj )
-				( { label = '', value = undefined, disabled = false, bgimage = null } = obj )
+				( { label = '', value = label, disabled = false, bgimage = null } = obj )
 				textArea.set( label )
 				choiceBox.disabled = disabled
 				image.img = bgimage
