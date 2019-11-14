@@ -9,6 +9,8 @@ import * as DB from './データベース.js'
 
 const Archive = $.importWorker( `ZIP` )
 
+const open2chURL = 'http://hayabusa.open2ch.net/test/read.cgi/news4vip/1537182605/l10'
+
 const extensions = {
 	text: [ 'txt' ],
 	image: [ 'png', 'webp', 'jpg', 'svg', 'gif' ],
@@ -202,6 +204,7 @@ async function playSystemOpening ( mode ) {
 		'更新する', '上書する',
 	]
 	$.disableChoiceList( [ '上書する', '更新する', ], menuList )
+	//if ( settings.origin != 'local/' ) $.disableChoiceList( [ '投稿する', ], menuList )
 
 	console.log( menuList )
 
@@ -284,21 +287,12 @@ async function playSystemOpening ( mode ) {
 			} break
 			case '保存する': {
 
-				Action.sysMessage( '作成中……' )
-
-				let prefix = settings.origin + title + '/'
-
-				let files = await DB.getAllFiles( prefix )
-				//let files = [ new File( [ ], 't1', { type: 'text/plain' } ) ]
-				let abs = await Promise.all( files.map( file => new Response( file ).arrayBuffer( ) ) )
-				let data = abs.map( ( ab, i ) => ( { buf: ab, name: files[ i ].name, type: files[ i ].type } ) )
-
-				let zip = await Archive.packFile( data, abs )
-				zip = new File( [ zip ], title + '.zip', { type: 'application/zip' } )
+				Action.sysMessage( 'ZIPファイル作成中……' )
+				let zip = await makeZIP()
 
 				$.download( zip, zip.name )
-
 				Action.sysMessage( '作品をZIPファイルにしました' )
+
 				let sel = await Action.sysChoices( [ ], { backLabel: '戻る' } )
 				if ( sel === $.Token.back ) break SWITCH
 				if ( sel === $.Token.close ) break WHILE
@@ -306,14 +300,102 @@ async function playSystemOpening ( mode ) {
 			} break
 			case '投稿する': {
 
-				await fetch( 'https://open-novel.work' )
-				Action.sysMessage( 'サーバーの準備ができていません\\nもうしばらくお待ち下さい' )
-				let sel = await Action.sysChoices( [ ], { backLabel: '戻る' } )
+				let sel
+				let ok = await fetch( 'https://open-novel.work' ).then( res => res.ok, ( ) => false  )
+
+				if ( ! ok ) {
+					Action.sysMessage( 'サーバーの準備ができていません\\nしばらく経ってからやり直してください' )
+					sel = await Action.sysChoices( [ ], { backLabel: '戻る' } )
+					if ( sel === $.Token.back ) break SWITCH
+					if ( sel === $.Token.close ) break WHILE
+				}
+
+				let mesList = [
+
+					`作品データをプレイヤー作者に送信して、\\n` +
+					`公開するための審査を受けることができます。\\n` +
+					`次のページ以降に表示される要項に同意してください。`,
+
+					`・投稿が成功しIDが発行された場合、24時間以内に\\n` +
+					`　作品の名前や紹介文などと共に現行のopen2chスレに書き込むこと\\n` +
+					`　open2chではコテハンをつけることを推奨する`,
+
+					`・投稿が成功した作品の公開を望まない場合\\n` +
+					`　open2chスレで紹介した後であれば、その旨の書き込みをし\\n` +
+					`　open2chスレで紹介する前であれば、何もしなくてよい`,
+
+					`・作品は自ら手を加えたものであること\\n` +
+					`・作品を沢山更新したり、沢山作ったりするようになった場合\\n` +
+					`　自ら作品を公開・管理できるようになることを目指すこと`,
+
+					`・素材は非商用での利用・改変が自由であるものに限り\\n` +
+					`　第三者の著作物が含まれていても良いが\\n` +
+					`　コピーライト表記の必要があれば適切に同梱すること`,
+
+					`・公開手続きに技術的・手続き的問題がある場合や、\\n` +
+					`　作品の内容が公開に相応しくないと判断された場合などは\\n` +
+					`　作品の公開が遅くなり、または公開されないことがある\\n`,
+
+					`要項は以上です`
+
+				]
+
+				for ( let mes of mesList ) {
+					Action.sysMessage( mes )
+					sel = await Action.sysChoices( [ ], { backLabel: '同意しない', nextLabel: '同意する' } )
+					if ( sel === $.Token.back ) break SWITCH
+					if ( sel === $.Token.close ) break WHILE
+				}
+
+				Action.sysMessage( 'ZIPファイル作成中……' )
+				let zip = await makeZIP()
+
+				Action.sysMessage( '投稿中……' )
+				let res = await ( await fetch(
+					'https://scenario.open-novel.work',
+					{
+						method: 'POST',
+						mode: 'cors',
+						headers: { 'content-type': 'application/zip' },
+						body: zip
+					}
+				) ).json( )
+
+				if ( res.completed ) {
+
+					navigator.clipboard.writeText( `ID: ${ res.data.id }` )
+					Action.sysMessage(
+						`作品審査を受け付ました　（ID: ${ res.data.id } ）\\n`
+						+ 'open2ch掲示板で上記IDと作品紹介文を投稿してください\\n'
+						+ '（IDはクリップボードにコピーされています）'
+					)
+
+				} else {
+					Action.sysMessage( '投稿が失敗しました\\n理由：' + res.data )
+				}
+
+				sel = await Action.sysChoices( [ 'open2chスレを開く' ], { backLabel: '戻る' } )
+				if ( sel === $.Token.back ) break SWITCH
+				if ( sel === $.Token.close ) break WHILE
+				window.open( open2chURL )
 
 			} break
 			default: {
 				await Action.sysMessage( 'この機能は未実装です' )
 			}
+		}
+
+
+		async function makeZIP ( ) {
+			let prefix = settings.origin + title + '/'
+
+			let files = await DB.getAllFiles( prefix )
+			//let files = [ new File( [ ], 't1', { type: 'text/plain' } ) ]
+			let abs = await Promise.all( files.map( file => new Response( file ).arrayBuffer( ) ) )
+			let data = abs.map( ( ab, i ) => ( { buf: ab, name: files[ i ].name, type: files[ i ].type } ) )
+
+			let zip = await Archive.packFile( data, abs )
+			return new File( [ zip ], title + '.zip', { type: 'application/zip' } )
 		}
 
 	}
@@ -364,7 +446,7 @@ async function showSysMenu ( ) {
 			break
 			case '操作方法リンク': window.open( 'https://github.com/open-novel/open-novel.github.io/wiki/' )
 			break
-			case '制作スレリンク': window.open( 'http://hayabusa.open2ch.net/test/read.cgi/news4vip/1537182605/l30' )
+			case '制作スレリンク': window.open( open2chURL )
 			break
 
 			case '受信チャンネル設定': {

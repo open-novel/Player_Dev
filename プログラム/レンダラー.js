@@ -760,7 +760,7 @@ export function drawCanvas ( mustDraw ) {
 
 	if ( timers.has( base ) ) {
 		let time = timers.get( base ).get( )
-		let value = ( time - 500 ) / 1000
+		let value = ( time - 500 ) / 1500
 		value = value < 0 ? 0 : value < 1 ? value : 1
 		layerRoot.progressCircle.prop( 'value', value )
 	}
@@ -944,7 +944,7 @@ export function onPoint ( { type, x, y } ) {
 				node.pushed = false
 				if ( pointer.delete( node ) ) {
 					let time = timers.get( node ).get( )
-					if ( time <= 1500 ) node.fire( 'click' )
+					if ( time <= 2000 ) node.fire( 'click' )
 					else { onAction( 'menu' ); break W }
 				}
 			} break
