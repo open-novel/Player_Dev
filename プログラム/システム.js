@@ -46,7 +46,7 @@ async function play ( { ctx, mode, installEvent: event, option: opt, params = ne
 
 		let text =
 			`openノベルプレイヤー` +
-			( $.Settings.TesterMode ? '　★テスターモード★' : '' ) + `\\n \\n` +
+			( localStorage.TesterMode ? '　★テスターモード★' : '' ) + `\\n \\n` +
 			`${ settings[ 'バージョン' ][ 0 ] }${ $.channel.includes( 'Dev' ) ? '(開発版)' : '' }  ${ settings[ '更新年月日' ][ 0 ] } \\n`
 
 
@@ -124,6 +124,7 @@ async function playSystemOpening ( mode ) {
 
 	} else {
 
+		let altBack = localStorage.LocalSync ? 'ローカル' : undefined
 
 		let noImage = await $.getImage( await $.fetchFile( './画像/画像なし.svg' ) )
 			.catch(
@@ -153,12 +154,42 @@ async function playSystemOpening ( mode ) {
 				value: { settings, index },
 				bgimage: image
 			}
-		}, { maxPages: 5, rowLen: 2, menuType: 'open' } )
+		}, { maxPages: 5, rowLen: 2, menuType: 'open', altBack } )
 
 
 		if ( cho == $.Token.back ) {
-			location.reload( )
-			await $.neverDone
+
+			if ( ! localStorage.LocalSync ) {
+				location.reload( )
+				await $.neverDone
+			}
+
+			let handle = await window.chooseFileSystemEntries( { type: 'openDirectory' } )
+			let status = await handle.requestPermission( { writable: true } )
+			$.log( status )
+			let folderList = [ ]
+			for await ( let h of handle.getEntries( ) ) {
+				if ( h.isDirectory ) folderList.push( h )
+			}
+
+			cho = await Action.sysPageChoices( async function * ( index ) {
+
+
+				let folder = folderList[ index ] || { }
+				let title = folder.name
+
+				yield {
+					label: title ? title : '--------',
+					value: folder,
+				}
+			}, { maxPages: 5, rowLen: 2, menuType: 'open', altBack: 'プレイヤー' } )
+
+			$.log( cho )
+
+			Action.sysMessage( '実装中です\\nまだ機能しません' )
+			await Action.sysChoices( [ ], { backLabel: 'トップへ' } )
+			return playSystemOpening( mode )
+
 		}
 
 		if ( cho == $.Token.close ) {
@@ -310,45 +341,20 @@ async function playSystemOpening ( mode ) {
 					if ( sel === $.Token.close ) break WHILE
 				}
 
-				let mesList = [
-
+				Action.sysMessage(
 					`作品データをプレイヤー作者に送信して、\\n` +
 					`公開するための審査を受けることができます。\\n` +
-					`次のページ以降に表示される要項に同意してください。`,
+					`作品投稿要項に同意して投稿しますか？`
+				)
 
-					`・投稿が成功しIDが発行された場合、24時間以内に\\n` +
-					`　作品の名前や紹介文などと共に現行のopen2chスレに書き込むこと\\n` +
-					`　open2chではコテハンをつけることを推奨する`,
+				sel = await Action.sysChoices( [ '作品投稿要項を見る' ], { backLabel: '同意しない', nextLabel: '同意する' } )
+				if ( sel == '作品投稿要項を見る' ) window.open( 'https://github.com/open-novel/open-novel.github.io/wiki/作品投稿要綱' )
+				if ( sel === $.Token.back ) break SWITCH
+				if ( sel === $.Token.close ) break WHILE
 
-					`・投稿が成功した作品の公開を望まない場合\\n` +
-					`　open2chスレで紹介した後であれば、その旨の書き込みをし\\n` +
-					`　open2chスレで紹介する前であれば、何もしなくてよい`,
-
-					`・作品は自ら手を加えたものであること\\n` +
-					`・作品を沢山更新したり、沢山作ったりするようになった場合\\n` +
-					`　自ら作品を公開・管理できるようになることを目指すこと`,
-
-					`・素材は非商用での利用・改変が自由であるものに限り\\n` +
-					`　第三者の著作物が含まれていても良いが\\n` +
-					`　コピーライト表記の必要があれば適切に同梱すること`,
-
-					`・公開手続きに技術的・手続き的問題がある場合や、\\n` +
-					`　作品の内容が公開に相応しくないと判断された場合などは\\n` +
-					`　作品の公開が遅くなり、または公開されないことがある\\n`,
-
-					`要項は以上です`
-
-				]
-
-				for ( let mes of mesList ) {
-					Action.sysMessage( mes )
-					sel = await Action.sysChoices( [ ], { backLabel: '同意しない', nextLabel: '同意する' } )
-					if ( sel === $.Token.back ) break SWITCH
-					if ( sel === $.Token.close ) break WHILE
-				}
 
 				Action.sysMessage( 'ZIPファイル作成中……' )
-				let zip = await makeZIP()
+				let zip = await makeZIP( )
 
 				Action.sysMessage( '投稿中……' )
 				let res = await ( await fetch(
@@ -363,11 +369,11 @@ async function playSystemOpening ( mode ) {
 
 				if ( res.completed ) {
 
-					navigator.clipboard.writeText( `ID: ${ res.data.id }` )
+					if ( navigator.clipboard ) navigator.clipboard.writeText( `(ID: ${ res.data.id } )` )
 					Action.sysMessage(
 						`作品審査を受け付ました　（ID: ${ res.data.id } ）\\n`
 						+ 'open2ch掲示板で上記IDと作品紹介文を投稿してください\\n'
-						+ '（IDはクリップボードにコピーされています）'
+						+ '（IDは対応環境ではクリップボードにコピーされています）'
 					)
 
 				} else {
@@ -548,7 +554,8 @@ async function showSysMenu ( ) {
 					'クリックで各機能を設定できます'
 				)
 
-				let { VR, TesterMode, LocalSync } = $.Settings
+				let { VR } = $.Settings
+				let { TesterMode, LocalSync } = localStorage
 				let chooseFile = window.chooseFileSystemEntries
 
 				let sel = await Action.sysChoices( [
@@ -559,7 +566,7 @@ async function showSysMenu ( ) {
 					},
 
 					{
-						label: `ローカル同期　（${ ! chooseFile ? '非対応' : LocalSync ? '現在ON ' : '現在OFF' }）`,
+						label: `ローカル同期　　（${ ! chooseFile ? '非対応' : LocalSync ? '現在ON ' : '現在OFF' }）`,
 						value: 'ローカル同期', disabled: ! chooseFile
 					},
 
@@ -589,12 +596,14 @@ async function showSysMenu ( ) {
 				switch ( sel ) {
 
 					case 'テスターモード': {
+
 						Action.sysMessage(
 							'テスターモードが有効だと以下の効果があります\\n' +
 							'・詳細なログをコンソールに表示\\n' +
 							'・アクセス解析を無効'
 						)
-						let choiceList = [ { label: 'ONにする' }, { label: 'OFFにする' } ]
+
+						let choiceList = [ 'ONにする', 'OFFにする' ]
 						$.disableChoiceList( [ ( TesterMode ? 'ON' : 'OFF' ) + 'にする'  ], choiceList )
 						let sel = await Action.sysChoices( choiceList, { backLabel: '戻る', color: 'green' } )
 						if ( sel == $.Token.back ) continue WHILE2
@@ -612,6 +621,26 @@ async function showSysMenu ( ) {
 					} break
 					case 'ローカル同期': {
 
+						Action.sysMessage(
+							'ローカルファイルに読み書きする権限を与えることで\\n' +
+							'自分の端末にある作品を１つ１つ登録しなくても\\n' +
+							'指定したフォルダ内の作品を表示・編集することができます'
+						)
+
+						let choiceList = [ 'ONにする', 'OFFにする' ]
+						$.disableChoiceList( [ ( LocalSync ? 'ON' : 'OFF' ) + 'にする'  ], choiceList )
+						let sel = await Action.sysChoices( choiceList, { backLabel: '戻る', color: 'green' } )
+						if ( sel == $.Token.back ) continue WHILE2
+						if ( sel == $.Token.close ) break WHILE
+						LocalSync = ! LocalSync
+						localStorage.LocalSync = LocalSync ? 'Yes' : ''
+						Action.sysMessage(
+							'次回起動時からローカル同期が【' + ( TesterMode ? 'ON' : 'OFF' ) + '】になるよう設定しました\\n' +
+							'変更を反映させるためにプレイヤーをリセットしてください'
+						)
+						await Action.sysChoices( [ ], { backLabel: 'リセットする', color: 'green' } )
+						location.reload( )
+						await $.neverDone
 
 					} break
 					case 'VR': {

@@ -15,11 +15,11 @@ import * as DB from './データベース.js'
 
 
 
-export let Settings = { VR: { enabled: false }, TesterMode: !! localStorage.TesterMode }
+export let Settings = { VR: { enabled: false } }
 
 
-let logEnabled = Settings.TesterMode
-localStorage.DoNotAnalytic = Settings.TesterMode ? 'Yes' : ''
+let logEnabled = localStorage.TesterMode
+localStorage.DoNotAnalytic = localStorage.TesterMode ? 'Yes' : ''
 
 const NOP = ( ) => { }
 
