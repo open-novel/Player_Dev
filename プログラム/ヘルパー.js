@@ -284,7 +284,7 @@ export class Time {
 
 export function importWorker ( name ) {
 
-	let w = new Worker( new URL( `プログラム/${ name }.js`, baseurl ) )
+	let w = new Worker( new URL( `./プログラム/${ name }.js`, baseurl ) )
 
 	return new Proxy( { }, {
 		get ( tar, key ) {
