@@ -118,13 +118,12 @@ async function playSystemOpening ( mode ) {
 
 
 	let cho
+	let altBack = ( localStorage.LocalSync && window.chooseFileSystemEntries ) ? 'ローカル' : undefined
 	if ( mode == 'direct' ) {
 
 		cho = { settings: titleList[ 0 ], index: 0 }
 
 	} else {
-
-		let altBack = localStorage.LocalSync ? 'ローカル' : undefined
 
 		let noImage = await $.getImage( await $.fetchFile( './画像/画像なし.svg' ) )
 			.catch(
@@ -159,7 +158,7 @@ async function playSystemOpening ( mode ) {
 
 		if ( cho == $.Token.back ) {
 
-			if ( ! localStorage.LocalSync ) {
+			if ( ! altBack ) {
 				location.reload( )
 				await $.neverDone
 			}
@@ -635,7 +634,7 @@ async function showSysMenu ( ) {
 						LocalSync = ! LocalSync
 						localStorage.LocalSync = LocalSync ? 'Yes' : ''
 						Action.sysMessage(
-							'次回起動時からローカル同期が【' + ( TesterMode ? 'ON' : 'OFF' ) + '】になるよう設定しました\\n' +
+							'次回起動時からローカル同期が【' + ( LocalSync ? 'ON' : 'OFF' ) + '】になるよう設定しました\\n' +
 							'変更を反映させるためにプレイヤーをリセットしてください'
 						)
 						await Action.sysChoices( [ ], { backLabel: 'リセットする', color: 'green' } )
