@@ -346,10 +346,13 @@ async function playSystemOpening ( mode ) {
 					`作品投稿要項に同意して投稿しますか？`
 				)
 
-				sel = await Action.sysChoices( [ '作品投稿要項を見る' ], { backLabel: '同意しない', nextLabel: '同意する' } )
-				if ( sel == '作品投稿要項を見る' ) window.open( 'https://github.com/open-novel/open-novel.github.io/wiki/作品投稿要綱' )
-				if ( sel === $.Token.back ) break SWITCH
-				if ( sel === $.Token.close ) break WHILE
+				while ( true ) {
+					sel = await Action.sysChoices( [ '作品投稿要項を見る' ], { backLabel: '同意しない', nextLabel: '同意する' } )
+					if ( sel == '作品投稿要項を見る' ) window.open( 'https://github.com/open-novel/open-novel.github.io/wiki/作品投稿要綱' )
+					if ( sel === $.Token.next ) break
+					if ( sel === $.Token.back ) break SWITCH
+					if ( sel === $.Token.close ) break WHILE
+				}
 
 
 				Action.sysMessage( 'ZIPファイル作成中……' )
