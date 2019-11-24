@@ -7,7 +7,7 @@ import * as $ from './ヘルパー.js'
 import * as Player from './システム.js'
 
 
-export async function main( { installEvent } ) {
+export async function main( { installEvent = new $.Deferred } = { } ) {
 
 	//Canvas要素の配置と準備
 	const wrapper = document.querySelector( '#ONPWrapper' )
